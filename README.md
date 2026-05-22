@@ -1,65 +1,66 @@
 # AI Study Companion
 
-An AI-powered full-stack study assistant designed to help students learn smarter by interacting with their uploaded study materials.
+An AI-powered full-stack web application that transforms traditional study notes into an interactive learning experience.
 
-The platform allows users to securely upload PDF notes, ask context-aware questions using an LLM, and generate quizzes from study content.
+AI Study Companion enables students to securely upload PDF study materials, interact with their notes through natural language questioning, and generate quizzes for self-assessment using Large Language Models (LLMs).
 
 ---
 
-## Project Overview
+## Overview
 
-AI Study Companion transforms static study notes into an interactive learning experience.
+Traditional study materials are static and time-consuming to navigate. AI Study Companion addresses this by combining modern full-stack development with AI-powered contextual learning.
 
-Instead of manually searching through notes, students can:
+The platform allows users to:
 
+- Securely create accounts and authenticate
 - Upload study PDFs
-- Ask natural language questions
-- Receive AI-generated contextual answers
-- Generate quizzes for self-assessment
-- Access a secure personalized study environment
+- Extract and store note content
+- Ask natural language questions about uploaded material
+- Receive AI-generated contextual responses
+- Generate quizzes for active learning and revision
 
-This project demonstrates modern full-stack development combined with practical AI integration.
+This project demonstrates practical integration of web development, backend engineering, database management, and generative AI.
 
 ---
 
-## Key Features
+## Core Features
 
 ### Authentication & Security
-- User Registration and Login
-- JWT-based Authentication
-- Protected Routes
-- Password Hashing using bcrypt
+- Secure user registration and login
+- JWT-based authentication
+- Protected frontend routes
+- Password hashing using bcrypt
 
 ### Study Material Management
-- Upload PDF Notes
-- PDF Text Extraction using pdf-parse
-- Persistent storage of extracted notes in MongoDB
+- PDF upload functionality
+- Automated PDF text extraction
+- Persistent note storage in MongoDB
 
-### AI-Powered Learning
-- Context-aware question answering using Groq API + Llama 3
-- AI answers generated from uploaded study material
-- Natural language interaction with notes
+### AI-Powered Learning Assistant
+- Context-aware question answering using Groq API
+- Llama 3 powered natural language responses
+- AI-generated explanations based on uploaded study content
 
 ### Quiz Generation
-- Automatic quiz generation from uploaded study content
-- Practice-based learning support
+- Automatic question extraction from uploaded notes
+- Self-assessment support for revision and practice
 
 ---
 
 ## System Architecture
 
 ```text
-Frontend (React)
+React Frontend
       ↓
-Backend API (Express.js)
+Express.js Backend API
       ↓
 Authentication Layer (JWT + bcrypt)
       ↓
-MongoDB Atlas (Users + Notes Storage)
+MongoDB Atlas Database
       ↓
-PDF Processing (multer + pdf-parse)
+PDF Upload & Text Extraction
       ↓
-Groq LLM API (Llama 3)
+Groq API (Llama 3 LLM)
       ↓
 AI-generated contextual responses
 ```
@@ -80,44 +81,43 @@ AI-generated contextual responses
 
 ### Database
 - MongoDB Atlas
-- Mongoose ODM
+- Mongoose
 
-### Authentication
+### Authentication & Security
 - JSON Web Token (JWT)
 - bcryptjs
 
-### File Processing
+### File Handling
 - multer
 - pdf-parse
 
-### AI / LLM
+### AI / LLM Integration
 - Groq API
-- Llama 3.1 Model
+- Llama 3.1
 
-### Version Control
+### Development Tools
 - Git
 - GitHub
 
 ---
 
-## Folder Structure
+## Project Structure
 
 ```text
 AI-Study-Companion/
 │
-├── client/                     # React frontend
+├── client/
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   ├── services/
 │   │   └── assets/
 │
-├── server/                     # Node.js backend
+├── server/
 │   ├── config/
 │   ├── controllers/
 │   ├── models/
 │   ├── routes/
-│   ├── uploads/
 │   └── server.js
 │
 ├── README.md
@@ -128,7 +128,7 @@ AI-Study-Companion/
 
 ## Installation & Setup
 
-### 1. Clone Repository
+### Clone Repository
 
 ```bash
 git clone https://github.com/nidhichougule/AI-Study-Companion.git
@@ -137,14 +137,16 @@ cd AI-Study-Companion
 
 ---
 
-### 2. Backend Setup
+### Backend Setup
+
+Install dependencies:
 
 ```bash
 cd server
 npm install
 ```
 
-Create environment file:
+Create `.env` file:
 
 ```env
 PORT=5000
@@ -153,7 +155,7 @@ JWT_SECRET=your_secret_key
 GROQ_API_KEY=your_groq_api_key
 ```
 
-Run backend:
+Run backend server:
 
 ```bash
 node server.js
@@ -161,7 +163,9 @@ node server.js
 
 ---
 
-### 3. Frontend Setup
+### Frontend Setup
+
+Install dependencies:
 
 ```bash
 cd client
@@ -169,75 +173,71 @@ npm install
 npm run dev
 ```
 
-Frontend runs at:
+---
 
-```text
-http://localhost:5173
-```
+## Example Workflow
 
-Backend runs at:
-
-```text
-http://localhost:5000
-```
+1. User creates an account
+2. Authenticates securely
+3. Uploads a PDF study document
+4. System extracts and stores note content
+5. User asks a question in natural language
+6. Uploaded note content is sent as context to the LLM
+7. AI generates an intelligent contextual response
+8. User generates quiz questions for revision
 
 ---
 
-## Example Use Case
+## Example AI Interaction
 
-1. User creates account
-2. Logs into secure dashboard
-3. Uploads study PDF
-4. System extracts PDF content
-5. User asks:
+**Question:**
 
 ```text
 Why is bcrypt used?
 ```
 
-6. AI processes:
+**AI Response:**
 
-- Uploaded notes context
-- User question
-- LLM reasoning
-
-7. Returns intelligent contextual answer
+```text
+bcrypt is used to securely hash passwords before storing them in the database. This improves security because even if the database is compromised, attackers cannot easily recover original passwords.
+```
 
 ---
 
 ## Future Enhancements
 
-- AI-generated MCQ quiz with options
-- Quiz scoring and performance tracking
-- Chat history
-- Multi-document support
-- User-specific note organization
-- Semantic search / vector database integration
+- AI-generated MCQ quizzes with answer options
+- Quiz scoring and progress tracking
+- Chat history management
+- Multi-document study support
+- User-specific document organization
+- Semantic search using vector databases
 - Retrieval-Augmented Generation (RAG)
-- Voice-based study assistant
+- Voice-enabled AI study assistant
+- Performance analytics dashboard
 
 ---
 
 ## Learning Outcomes
 
-This project demonstrates understanding of:
+This project demonstrates practical experience in:
 
-- Full-stack application development
+- Full-stack web development
 - REST API design
-- Authentication & authorization
-- Secure password handling
-- Database design with MongoDB
-- File upload & parsing workflows
-- LLM API integration
-- AI-powered application architecture
-- Client-server communication
+- Authentication and authorization
+- Secure credential management
+- MongoDB database integration
+- File upload and PDF parsing workflows
+- Third-party AI API integration
+- LLM-powered application development
+- Client-server architecture
+- AI-assisted educational application design
 
 ---
 
 ## Author
 
-**Nidhi Chougule**
-
+**Nidhi Chougule**  
 Electronics & Computer Science Student  
 Aspiring AI/ML Engineer | Full Stack Developer
 
@@ -247,4 +247,4 @@ GitHub: https://github.com/nidhichougule
 
 ## License
 
-This project is developed for academic learning and portfolio demonstration.
+This project is intended for academic learning, portfolio demonstration, and educational experimentation.
