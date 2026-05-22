@@ -1,20 +1,67 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/api";
 
 function Login() {
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+
+    const data = await loginUser(formData);
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      setMessage("Login successful");
+      navigate("/dashboard");
+    } else {
+      setMessage(data.message);
+    }
+  };
+
   return (
     <div style={container}>
-      <div style={card}>
+      <form style={card} onSubmit={handleLogin}>
         <h1>Login</h1>
 
-        <input style={input} type="email" placeholder="Email" />
-        <input style={input} type="password" placeholder="Password" />
+        <input
+          style={input}
+          name="email"
+          type="email"
+          placeholder="Email"
+          onChange={handleChange}
+        />
+
+        <input
+          style={input}
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+        />
 
         <button style={button}>Login</button>
+
+        <p>{message}</p>
 
         <p>
           New user? <Link to="/signup">Create account</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }

@@ -1,15 +1,46 @@
+import { useState } from "react";
+
 function Chat() {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+
+  const handleAsk = async () => {
+    if (!question) {
+      setAnswer("Please enter a question.");
+      return;
+    }
+
+    const response = await fetch("http://localhost:5000/api/chat/ask", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question }),
+    });
+
+    const data = await response.json();
+    setAnswer(data.answer || `${data.message}: ${data.error}`);
+  };
+
   return (
     <div style={container}>
       <h1>Ask AI</h1>
 
       <div style={chatBox}>
-        <p style={{ color: "#666" }}>AI answers will appear here...</p>
+        <p>{answer || "AI answers will appear here..."}</p>
       </div>
 
       <div style={inputRow}>
-        <input style={input} placeholder="Ask a question from your notes..." />
-        <button style={button}>Ask</button>
+        <input
+          style={input}
+          placeholder="Ask a question from your notes..."
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
+
+        <button style={button} onClick={handleAsk}>
+          Ask
+        </button>
       </div>
     </div>
   );
@@ -19,7 +50,7 @@ const container = { padding: "40px" };
 
 const chatBox = {
   background: "white",
-  height: "300px",
+  minHeight: "300px",
   padding: "20px",
   borderRadius: "12px",
   boxShadow: "0 0 10px rgba(0,0,0,0.1)",
