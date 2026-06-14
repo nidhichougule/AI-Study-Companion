@@ -1,64 +1,83 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
+import "./App.css";
 
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+export default function App() {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Chat from "./pages/Chat";
-import Quiz from "./pages/Quiz";
-import Upload from "./pages/Upload";
+  const chatRef = useRef(null);
 
-function App() {
+  // Auto scroll
+  useEffect(() => {
+    chatRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const askAI = async () => {
+    if (!question.trim()) return;
+
+    const updated = [...messages, { role: "user", text: question }];
+    setMessages(updated);
+    setQuestion("");
+    setLoading(true);
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/chat/ask", {
+        question,
+      });
+
+      setMessages([
+        ...updated,
+        { role: "ai", text: res.data.answer },
+      ]);
+    } catch (err) {
+      setMessages([
+        ...updated,
+        { role: "ai", text: "Error getting response ❌" },
+      ]);
+    }
+
+    setLoading(false);
+  };
+
   return (
-    <Router>
-      <Navbar />
+    <div className="app">
+      <div className="header">🧠 AI Study Companion</div>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+      <div className="chatBox">
+        {messages.map((m, i) => (
+          <div key={i} className={`msg ${m.role}`}>
+            {m.text}
+          </div>
+        ))}
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+        {loading && (
+          <div className="msg ai">
+            AI is thinking...
+            <span className="dots">...</span>
+          </div>
+        )}
+
+        {/* scroll anchor */}
+        <div ref={chatRef}></div>
+      </div>
+
+      <form
+        className="inputBox"
+        onSubmit={(e) => {
+          e.preventDefault();
+          askAI();
+        }}
+      >
+        <input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask your question..."
         />
 
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <Upload />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/chat"
-          element={
-            <ProtectedRoute>
-              <Chat />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/quiz"
-          element={
-            <ProtectedRoute>
-              <Quiz />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+        <button type="submit">Send</button>
+      </form>
+    </div>
   );
 }
-
-export default App;
