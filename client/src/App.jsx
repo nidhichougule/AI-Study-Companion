@@ -1,64 +1,48 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+export default function App() {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
 
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Chat from "./pages/Chat";
-import Quiz from "./pages/Quiz";
-import Upload from "./pages/Upload";
+  const askAI = async () => {
+    if (!question) return;
 
-function App() {
+    const userMsg = { type: "user", text: question };
+    setMessages([...messages, userMsg]);
+
+    const res = await axios.post("http://localhost:5000/api/chat/ask", {
+      question,
+    });
+
+    const botMsg = { type: "bot", text: res.data.answer };
+
+    setMessages((prev) => [...prev, botMsg]);
+    setQuestion("");
+  };
+
   return (
-    <Router>
-      <Navbar />
+    <div style={{ padding: 20, fontFamily: "Arial" }}>
+      <h2>🧠 AI Study Companion</h2>
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+      <div style={{ minHeight: 300, border: "1px solid #ccc", padding: 10 }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{ margin: "10px 0" }}>
+            <b>{m.type === "user" ? "You" : "AI"}:</b> {m.text}
+          </div>
+        ))}
+      </div>
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+      <input
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask your question..."
+        style={{ width: "70%", padding: 8 }}
+      />
 
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <Upload />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/chat"
-          element={
-            <ProtectedRoute>
-              <Chat />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/quiz"
-          element={
-            <ProtectedRoute>
-              <Quiz />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+      <button onClick={askAI} style={{ padding: 8, marginLeft: 10 }}>
+        Ask
+      </button>
+    </div>
   );
 }
-
-export default App;

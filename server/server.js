@@ -1,13 +1,12 @@
 const dotenv = require("dotenv");
 dotenv.config();
-
+const chatRoutes = require("./routes/chatRoutes");
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
-const chatRoutes = require("./routes/chatRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const Note = require("./models/Note");
 const retrievalRoutes = require("./routes/retrievalRoutes");
@@ -43,7 +42,9 @@ app.get("/api/debug/latest-note", async (req, res) => {
     textPreview: note.extractedText.substring(0, 3000),
   });
 });
-
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
