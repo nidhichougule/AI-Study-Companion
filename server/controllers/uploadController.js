@@ -1,6 +1,7 @@
-const Chunk = require("../models/Chunk");
 const { splitIntoChunks } = require("../services/chunkService");
-// const { splitIntoChunks } = require("../services/chunkService");
+const { generateEmbedding } = require("../services/embeddingService");
+const { addChunksToDB } = require("../services/vectorStore");
+
 const fs = require("fs");
 const pdfParse = require("pdf-parse");
 const Note = require("../models/Note");
@@ -13,30 +14,37 @@ const uploadPDF = async (req, res) => {
 
     const fileBuffer = fs.readFileSync(req.file.path);
     const pdfData = await pdfParse(fileBuffer);
-    const chunks = await splitIntoChunks(pdfData.text);
-    for (let i = 0; i < chunks.length; i++) {
-  await Chunk.create({
-    userId: req.user ? req.user.id : null,
-    fileName: req.file.originalname,
-    chunkIndex: i,
-    content: chunks[i],
-  });
-}
-    console.log("Total Chunks:", chunks.length);
-    console.log("First Chunk:");
-    console.log(chunks[0]);
+
+    // 1. Chunk text
+    const chunks = splitIntoChunks(pdfData.text);
+
+    // 2. Embeddings
+    const embeddings = [];
+
+    for (let chunk of chunks) {
+      const embedding = await generateEmbedding(chunk);
+      embeddings.push(embedding);
+    }
+
+    // 3. Store in ChromaDB ONLY
+    await addChunksToDB(chunks, embeddings, req.file.originalname);
+
+    console.log("Chunks stored in ChromaDB");
+
+    // Save only metadata (optional)
     const note = await Note.create({
       userId: req.user ? req.user.id : null,
       fileName: req.file.originalname,
       extractedText: pdfData.text,
-});
+    });
+
     res.status(201).json({
-      message: "PDF uploaded and text extracted successfully",
+      message: "PDF processed with RAG successfully",
       noteId: note._id,
       fileName: note.fileName,
-      textPreview: pdfData.text.substring(0, 300),
     });
-    } catch (error) {
+
+  } catch (error) {
     console.log("PDF upload error:", error);
 
     res.status(500).json({

@@ -1,14 +1,17 @@
-const {
-  RecursiveCharacterTextSplitter,
-} = require("@langchain/textsplitters");
+const splitIntoChunks = (text) => {
+  if (!text) return [];
 
-const splitIntoChunks = async (text) => {
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 200,
-  });
+  const chunkSize = 1000;
+  const overlap = 200;
 
-  return await splitter.splitText(text);
+  let chunks = [];
+
+  for (let i = 0; i < text.length; i += chunkSize - overlap) {
+    const chunk = text.substring(i, i + chunkSize);
+    chunks.push(chunk);
+  }
+
+  return chunks;
 };
 
 module.exports = { splitIntoChunks };
