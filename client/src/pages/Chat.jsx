@@ -1,80 +1,56 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
-function Chat() {
+export default function Chat() {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleAsk = async () => {
-    if (!question) {
-      setAnswer("Please enter a question.");
-      return;
-    }
+  const chatRef = useRef(null);
 
-    const response = await fetch("http://localhost:5000/api/chat/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question }),
+  useEffect(() => {
+    chatRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const askAI = async () => {
+    if (!question.trim()) return;
+
+    const updated = [...messages, { role: "user", text: question }];
+    setMessages(updated);
+    setQuestion("");
+    setLoading(true);
+
+    const res = await axios.post("http://localhost:5000/api/chat/ask", {
+      question,
     });
 
-    const data = await response.json();
-    setAnswer(data.answer || `${data.message}: ${data.error}`);
+    setMessages([...updated, { role: "ai", text: res.data.answer }]);
+    setLoading(false);
   };
 
   return (
-    <div style={container}>
-      <h1>Ask AI</h1>
+    <div style={{ padding: 20 }}>
+      <h2>💬 Chat with AI</h2>
 
-      <div style={chatBox}>
-        <p>{answer || "AI answers will appear here..."}</p>
+      <div style={{ height: 400, overflowY: "auto", border: "1px solid #ccc", padding: 10 }}>
+        {messages.map((m, i) => (
+          <div key={i} style={{ margin: "10px 0" }}>
+            <b>{m.role === "user" ? "You" : "AI"}:</b> {m.text}
+          </div>
+        ))}
+
+        {loading && <div>AI is thinking...</div>}
+
+        <div ref={chatRef}></div>
       </div>
 
-      <div style={inputRow}>
-        <input
-          style={input}
-          placeholder="Ask a question from your notes..."
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-        />
+      <input
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        placeholder="Ask something..."
+      />
 
-        <button style={button} onClick={handleAsk}>
-          Ask
-        </button>
-      </div>
+      <button onClick={askAI}>Send</button>
     </div>
   );
 }
-
-const container = { padding: "40px" };
-
-const chatBox = {
-  background: "white",
-  minHeight: "300px",
-  padding: "20px",
-  borderRadius: "12px",
-  boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-};
-
-const inputRow = {
-  display: "flex",
-  gap: "10px",
-  marginTop: "20px",
-};
-
-const input = {
-  flex: 1,
-  padding: "12px",
-  borderRadius: "8px",
-  border: "1px solid #ccc",
-};
-
-const button = {
-  padding: "12px 20px",
-  background: "#7c3aed",
-  color: "white",
-  border: "none",
-  borderRadius: "8px",
-};
-
-export default Chat;

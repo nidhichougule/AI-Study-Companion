@@ -1,48 +1,83 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import "./App.css";
 
 export default function App() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const chatRef = useRef(null);
+
+  // Auto scroll
+  useEffect(() => {
+    chatRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   const askAI = async () => {
-    if (!question) return;
+    if (!question.trim()) return;
 
-    const userMsg = { type: "user", text: question };
-    setMessages([...messages, userMsg]);
-
-    const res = await axios.post("http://localhost:5000/api/chat/ask", {
-      question,
-    });
-
-    const botMsg = { type: "bot", text: res.data.answer };
-
-    setMessages((prev) => [...prev, botMsg]);
+    const updated = [...messages, { role: "user", text: question }];
+    setMessages(updated);
     setQuestion("");
+    setLoading(true);
+
+    try {
+      const res = await axios.post("http://localhost:5000/api/chat/ask", {
+        question,
+      });
+
+      setMessages([
+        ...updated,
+        { role: "ai", text: res.data.answer },
+      ]);
+    } catch (err) {
+      setMessages([
+        ...updated,
+        { role: "ai", text: "Error getting response ❌" },
+      ]);
+    }
+
+    setLoading(false);
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h2>🧠 AI Study Companion</h2>
+    <div className="app">
+      <div className="header">🧠 AI Study Companion</div>
 
-      <div style={{ minHeight: 300, border: "1px solid #ccc", padding: 10 }}>
+      <div className="chatBox">
         {messages.map((m, i) => (
-          <div key={i} style={{ margin: "10px 0" }}>
-            <b>{m.type === "user" ? "You" : "AI"}:</b> {m.text}
+          <div key={i} className={`msg ${m.role}`}>
+            {m.text}
           </div>
         ))}
+
+        {loading && (
+          <div className="msg ai">
+            AI is thinking...
+            <span className="dots">...</span>
+          </div>
+        )}
+
+        {/* scroll anchor */}
+        <div ref={chatRef}></div>
       </div>
 
-      <input
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        placeholder="Ask your question..."
-        style={{ width: "70%", padding: 8 }}
-      />
+      <form
+        className="inputBox"
+        onSubmit={(e) => {
+          e.preventDefault();
+          askAI();
+        }}
+      >
+        <input
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          placeholder="Ask your question..."
+        />
 
-      <button onClick={askAI} style={{ padding: 8, marginLeft: 10 }}>
-        Ask
-      </button>
+        <button type="submit">Send</button>
+      </form>
     </div>
   );
 }
