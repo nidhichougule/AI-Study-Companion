@@ -1,8 +1,15 @@
 const express = require("express");
-const { askQuestion } = require("../controllers/chatController");
-
 const router = express.Router();
 
-router.post("/ask", askQuestion);
+const auth = require("../middleware/authMiddleware");
+const {
+  askQuestion,
+  getChats,
+  createChat,
+} = require("../controllers/chatController");
+
+router.post("/ask", auth, askQuestion);
+router.get("/", auth, getChats);
+router.post("/create", auth, createChat);
 
 module.exports = router;
