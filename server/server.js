@@ -12,15 +12,18 @@ const Note = require("./models/Note");
 const retrievalRoutes = require("./routes/retrievalRoutes");
 console.log("retrievalRoutes =", retrievalRoutes);
 const app = express();
+app.use(express.json());
+
+
 
 connectDB();
 // const retrievalRoutes = require("./routes/retrievalRoutes");
 // console.log(retrievalRoutes);
 
 app.use(cors());
-app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+
 app.use("/api/upload", uploadRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/quiz", quizRoutes);

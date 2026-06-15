@@ -8,6 +8,9 @@ const Note = require("../models/Note");
 
 const uploadPDF = async (req, res) => {
   try {
+    console.log("FILE:", req.file);
+    console.log("USER:", req.user);
+
     if (!req.file) {
       return res.status(400).json({ message: "No PDF uploaded" });
     }
