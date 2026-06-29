@@ -1,31 +1,39 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
-export default function Login() {
+export default function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const loginUser = async () => {
+  const registerUser = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      await axios.post("http://localhost:5000/api/auth/register", {
+        name,
         email,
         password,
       });
 
-      localStorage.setItem("token", res.data.token);
-      navigate("/chat");
+      alert("Registered successfully ✔");
+      navigate("/");
     } catch (err) {
-      alert("Login failed ❌");
+      alert("Registration failed ❌");
     }
   };
 
   return (
     <div style={styles.container}>
       <div style={styles.card}>
-        <h2>🧠 AI Study Companion</h2>
-        <p>Login to continue</p>
+        <h2>🧠 Create Account</h2>
+
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={styles.input}
+        />
 
         <input
           placeholder="Email"
@@ -42,9 +50,13 @@ export default function Login() {
           style={styles.input}
         />
 
-        <button onClick={loginUser} style={styles.button}>
-          Login
+        <button onClick={registerUser} style={styles.button}>
+          Register
         </button>
+
+        <p>
+          Already have an account? <Link to="/">Login</Link>
+        </p>
       </div>
     </div>
   );
@@ -75,7 +87,7 @@ const styles = {
   },
   button: {
     padding: 10,
-    background: "#22c55e",
+    background: "#3b82f6",
     border: "none",
     color: "white",
     cursor: "pointer",

@@ -13,7 +13,9 @@ const retrievalRoutes = require("./routes/retrievalRoutes");
 console.log("retrievalRoutes =", retrievalRoutes);
 const app = express();
 app.use(express.json());
+const chatHistoryRoutes = require("./routes/chatHistoryRoutes");
 
+app.use("/api/chats", chatHistoryRoutes);
 
 
 connectDB();
