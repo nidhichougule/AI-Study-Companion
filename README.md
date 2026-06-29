@@ -127,55 +127,6 @@ AI-Study-Companion/
 
 ---
 
-## Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/nidhichougule/AI-Study-Companion.git
-cd AI-Study-Companion
-```
-
----
-
-### Backend Setup
-
-Install dependencies:
-
-```bash
-cd server
-npm install
-```
-
-Create `.env` file:
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-GROQ_API_KEY=your_groq_api_key
-```
-
-Run backend:
-
-```bash
-node server.js
-```
-
----
-
-### Frontend Setup
-
-Install dependencies:
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
----
-
 ## Example Workflow
 
 1. User registers and logs in
