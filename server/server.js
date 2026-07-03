@@ -12,9 +12,13 @@ const Note = require("./models/Note");
 const retrievalRoutes = require("./routes/retrievalRoutes");
 console.log("retrievalRoutes =", retrievalRoutes);
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 app.use(express.json());
 const chatHistoryRoutes = require("./routes/chatHistoryRoutes");
-
+const noteRoutes = require("./routes/noteRoutes");
+app.use("/api/notes", noteRoutes);
 app.use("/api/chats", chatHistoryRoutes);
 
 
@@ -46,9 +50,7 @@ app.get("/api/debug/latest-note", async (req, res) => {
     textPreview: note.extractedText.substring(0, 3000),
   });
 });
-app.use(cors({
-  origin: "http://localhost:5173"
-}));
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
