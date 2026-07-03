@@ -1,25 +1,38 @@
-const BASE_URL = "http://localhost:5000/api/auth";
+import axios from "axios";
 
-export const signupUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/signup`, {
-    method: "POST",
+const API = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
+
+// Automatically attach JWT
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// ---------------- CHAT ----------------
+
+export const getChats = () => API.get("/chats");
+
+export const createChat = () => API.post("/chat/create");
+
+export const askQuestion = (data) =>
+  API.post("/chat/ask", data);
+
+// ---------------- PDF ----------------
+
+export const uploadPDF = (formData) =>
+  API.post("/upload/pdf", formData, {
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "multipart/form-data",
     },
-    body: JSON.stringify(userData),
   });
 
-  return response.json();
-};
+export const getNotes = () => API.get("/notes");
 
-export const loginUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
-
-  return response.json();
-};
+export default API;

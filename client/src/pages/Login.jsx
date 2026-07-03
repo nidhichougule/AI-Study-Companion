@@ -15,7 +15,7 @@ export default function Login() {
       });
 
       localStorage.setItem("token", res.data.token);
-      navigate("/chat");
+      navigate("/dashboard");
     } catch (err) {
       alert("Login failed ❌");
     }

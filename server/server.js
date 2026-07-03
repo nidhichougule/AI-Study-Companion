@@ -22,7 +22,6 @@ connectDB();
 // const retrievalRoutes = require("./routes/retrievalRoutes");
 // console.log(retrievalRoutes);
 
-app.use(cors());
 
 app.use("/api/auth", authRoutes);
 
