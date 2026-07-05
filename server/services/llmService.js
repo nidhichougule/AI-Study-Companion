@@ -1,23 +1,9 @@
 const { HfInference } = require("@huggingface/inference");
 
-const hf = new HfInference(process.env.HF_TOKEN);
+const hf = new HfInference(process.env.HF_TOKEN || process.env.HF_API_KEY);
 
-// 🧠 Generate answer using Llama / Mistral / free model
-const generateAnswer = async (question, context) => {
-  const prompt = `
-You are an AI study assistant.
-
-Use the context below to answer the question.
-
-Context:
-${context}
-
-Question:
-${question}
-
-Answer in simple words:
-`;
-
+const generateAnswer = async (prompt) => {
+  const startedAt = Date.now();
   const response = await hf.textGeneration({
     model: "mistralai/Mistral-7B-Instruct-v0.2",
     inputs: prompt,
@@ -26,6 +12,9 @@ Answer in simple words:
       temperature: 0.7,
     },
   });
+
+  const elapsedMs = Date.now() - startedAt;
+  console.log(`[RAG] LLM response generated in ${elapsedMs}ms | promptChars=${String(prompt || "").length}`);
 
   return response.generated_text;
 };

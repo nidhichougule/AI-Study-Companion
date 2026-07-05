@@ -10,7 +10,6 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const Note = require("./models/Note");
 const retrievalRoutes = require("./routes/retrievalRoutes");
-console.log("retrievalRoutes =", retrievalRoutes);
 const app = express();
 app.use(cors({
   origin: "http://localhost:5173"
@@ -47,7 +46,8 @@ app.get("/api/debug/latest-note", async (req, res) => {
 
   res.json({
     fileName: note.fileName,
-    textPreview: note.extractedText.substring(0, 3000),
+    chunkCount: note.chunkCount,
+    pdfTextLength: note.pdfTextLength,
   });
 });
 

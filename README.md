@@ -43,6 +43,13 @@ This project demonstrates full-stack development, backend API design, database i
 - Llama 3 model usage
 - AI-generated responses using uploaded PDF content as context
 
+### Chat History
+- Create, rename, and delete chats
+- Persist and load conversations from MongoDB
+- Continue existing conversations by chat ID
+- Store chat/message timestamps and associated PDF IDs
+- Return chats sorted by most recently updated
+
 ### Quiz Generation
 - Automatic extraction of practice questions from uploaded study notes
 

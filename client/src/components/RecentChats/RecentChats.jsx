@@ -2,38 +2,68 @@ import styles from "./RecentChats.module.css";
 
 const ArrowIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <line x1="5" y1="12" x2="19" y2="12"/>
-    <polyline points="12 5 19 12 12 19"/>
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
   </svg>
 );
 
-const conversations = [
-  { id: 1, title: "Explain neural networks", preview: "A neural network is a computational model inspired by the structure of the brain...", time: "2h ago", tags: ["AI", "Machine Learning"], color: "#6366f1" },
-  { id: 2, title: "Thermodynamics Chapter 5", preview: "The first law of thermodynamics states that energy cannot be created or destroyed...", time: "Yesterday", tags: ["Physics"], color: "#0ea5e9" },
-  { id: 3, title: "World War II Quiz", preview: "Q: When did WW2 begin? A: World War II began on September 1, 1939...", time: "2 days ago", tags: ["History", "Quiz"], color: "#f59e0b" },
-];
+const formatRelativeTime = (value) => {
+  const timestamp = new Date(value).getTime();
+  if (!timestamp) return "Just now";
 
-export default function RecentChats() {
+  const diffMs = Date.now() - timestamp;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diffMs < minute) return "Just now";
+  if (diffMs < hour) return `${Math.floor(diffMs / minute)}m ago`;
+  if (diffMs < day) return `${Math.floor(diffMs / hour)}h ago`;
+  return `${Math.floor(diffMs / day)}d ago`;
+};
+
+export default function RecentChats({ chats = [], onOpenChat }) {
+  const conversations = chats.slice(0, 6).map((chat) => {
+    const lastMessage = (chat.messages || []).slice(-1)[0];
+
+    return {
+      id: chat._id,
+      title: chat.title || "New Chat",
+      preview: lastMessage?.text || "No messages yet",
+      time: formatRelativeTime(chat.updatedAt || chat.createdAt),
+      tags: [`${(chat.pdfIds || []).length} PDFs`],
+      color: "#6366f1",
+    };
+  });
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
         <h3 className={styles.title}>Recent Conversations</h3>
-        <button className={styles.viewAll}>View all <ArrowIcon /></button>
+        <button className={styles.viewAll}>
+          View all <ArrowIcon />
+        </button>
       </div>
       <div className={styles.grid}>
-        {conversations.map(conv => (
-          <div key={conv.id} className={styles.card} style={{ "--accent": conv.color }}>
+        {conversations.map((conversation) => (
+          <div key={conversation.id} className={styles.card} style={{ "--accent": conversation.color }}>
             <div className={styles.cardTop}>
-              <div className={styles.dot} style={{ background: conv.color }}></div>
-              <span className={styles.time}>{conv.time}</span>
+              <div className={styles.dot} style={{ background: conversation.color }}></div>
+              <span className={styles.time}>{conversation.time}</span>
             </div>
-            <p className={styles.convTitle}>{conv.title}</p>
-            <p className={styles.preview}>{conv.preview}</p>
+            <p className={styles.convTitle}>{conversation.title}</p>
+            <p className={styles.preview}>{conversation.preview}</p>
             <div className={styles.footer}>
               <div className={styles.tags}>
-                {conv.tags.map(t => <span key={t} className={styles.tag}>{t}</span>)}
+                {conversation.tags.map((tag) => (
+                  <span key={tag} className={styles.tag}>
+                    {tag}
+                  </span>
+                ))}
               </div>
-              <button className={styles.openBtn}>Open</button>
+              <button className={styles.openBtn} onClick={() => onOpenChat?.(conversation.id)}>
+                Open
+              </button>
             </div>
           </div>
         ))}

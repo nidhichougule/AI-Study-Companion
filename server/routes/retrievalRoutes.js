@@ -1,7 +1,7 @@
 
 const express = require("express");
 const router = express.Router();
-console.log("retrievalRoutes loaded");
+const auth = require("../middleware/authMiddleware");
 const {
   searchChunks,
 } = require("../controllers/retrievalController");
@@ -12,6 +12,6 @@ router.get("/test", (req, res) => {
   });
 });
 
-router.post("/search", searchChunks);
+router.post("/search", auth, searchChunks);
 
 module.exports = router;
