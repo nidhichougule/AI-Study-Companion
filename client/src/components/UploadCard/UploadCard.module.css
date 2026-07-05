@@ -1,0 +1,95 @@
+.card {
+  position: relative;
+  background: #111827;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.toast {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+.toastSuccess {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+.toastError {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+.dropZone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 32px;
+  border: 2px dashed rgba(99,102,241,0.3);
+  border-radius: 14px;
+  margin: 3px;
+  transition: border-color 0.2s, background 0.2s;
+  cursor: pointer;
+  text-align: center;
+}
+.hiddenInput {
+  display: none;
+}
+.dropZone:hover {
+  border-color: rgba(99,102,241,0.6);
+  background: rgba(99,102,241,0.04);
+}
+.iconRing {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #818cf8;
+  margin-bottom: 18px;
+}
+.mainText { font-size: 16px; font-weight: 600; color: #e2e8f0; margin: 0 0 8px; }
+.subText { font-size: 13.5px; color: #64748b; margin: 0 0 20px; max-width: 340px; line-height: 1.6; }
+.btnRow { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.browseBtn {
+  padding: 9px 20px;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.browseBtn:hover { background: #4f46e5; transform: translateY(-1px); }
+.browseBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+.divider { color: #475569; font-size: 13px; }
+.hint { color: #64748b; font-size: 13px; }
+.progressTrack {
+  width: min(260px, 90%);
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  transition: width 0.2s ease;
+}
+.fileNote { font-size: 11.5px; color: #334155; margin: 0; }

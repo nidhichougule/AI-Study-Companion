@@ -43,6 +43,13 @@ This project demonstrates full-stack development, backend API design, database i
 - Llama 3 model usage
 - AI-generated responses using uploaded PDF content as context
 
+### Chat History
+- Create, rename, and delete chats
+- Persist and load conversations from MongoDB
+- Continue existing conversations by chat ID
+- Store chat/message timestamps and associated PDF IDs
+- Return chats sorted by most recently updated
+
 ### Quiz Generation
 - Automatic extraction of practice questions from uploaded study notes
 
@@ -123,6 +130,55 @@ AI-Study-Companion/
 │
 ├── README.md
 └── .gitignore
+```
+
+---
+
+## Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/nidhichougule/AI-Study-Companion.git
+cd AI-Study-Companion
+```
+
+---
+
+### Backend Setup
+
+Install dependencies:
+
+```bash
+cd server
+npm install
+```
+
+Create `.env` file:
+
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_secret_key
+GROQ_API_KEY=your_groq_api_key
+```
+
+Run backend:
+
+```bash
+node server.js
+```
+
+---
+
+### Frontend Setup
+
+Install dependencies:
+
+```bash
+cd client
+npm install
+npm run dev
 ```
 
 ---

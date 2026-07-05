@@ -10,11 +10,14 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const Note = require("./models/Note");
 const retrievalRoutes = require("./routes/retrievalRoutes");
-console.log("retrievalRoutes =", retrievalRoutes);
 const app = express();
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 app.use(express.json());
 const chatHistoryRoutes = require("./routes/chatHistoryRoutes");
-
+const noteRoutes = require("./routes/noteRoutes");
+app.use("/api/notes", noteRoutes);
 app.use("/api/chats", chatHistoryRoutes);
 
 
@@ -22,7 +25,6 @@ connectDB();
 // const retrievalRoutes = require("./routes/retrievalRoutes");
 // console.log(retrievalRoutes);
 
-app.use(cors());
 
 app.use("/api/auth", authRoutes);
 
@@ -44,12 +46,11 @@ app.get("/api/debug/latest-note", async (req, res) => {
 
   res.json({
     fileName: note.fileName,
-    textPreview: note.extractedText.substring(0, 3000),
+    chunkCount: note.chunkCount,
+    pdfTextLength: note.pdfTextLength,
   });
 });
-app.use(cors({
-  origin: "http://localhost:5173"
-}));
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

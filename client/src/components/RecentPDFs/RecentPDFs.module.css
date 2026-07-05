@@ -1,0 +1,15 @@
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.title { font-size: 15px; font-weight: 700; color: #e2e8f0; margin: 0; letter-spacing: -0.2px; }
+.list { background: #111827; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; cursor: pointer; }
+.row:last-child { border-bottom: none; }
+.row:hover { background: rgba(255,255,255,0.03); }
+.iconWrap { width: 38px; height: 38px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: center; color: #f87171; flex-shrink: 0; }
+.info { flex: 1; min-width: 0; }
+.pdfName { font-size: 13.5px; font-weight: 600; color: #cbd5e1; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #475569; }
+.dot { color: #334155; }
+.right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.chatBadge { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: #64748b; }
+.askBtn { padding: 6px 14px; background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.askBtn:hover { background: rgba(99,102,241,0.28); color: #a5b4fc; }

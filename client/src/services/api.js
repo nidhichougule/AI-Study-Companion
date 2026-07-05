@@ -1,25 +1,43 @@
-const BASE_URL = "http://localhost:5000/api/auth";
+import axios from "axios";
 
-export const signupUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/signup`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userData),
-  });
+export const DATA_CHANGED_EVENT = "studyai:data-changed";
 
-  return response.json();
+export const notifyDataChanged = () => {
+  window.dispatchEvent(new Event(DATA_CHANGED_EVENT));
 };
 
-export const loginUser = async (userData) => {
-  const response = await fetch(`${BASE_URL}/login`, {
-    method: "POST",
+const API = axios.create({
+  baseURL: "http://localhost:5000/api",
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// ---------------- CHAT ----------------
+
+export const getChats = () => API.get("/chats");
+export const getChatById = (chatId) => API.get(`/chats/${chatId}`);
+export const createChat = (payload = {}) => API.post("/chat/create", payload);
+export const askQuestion = (data, config = {}) => API.post("/chat/ask", data, config);
+export const renameChat = (chatId, title) => API.patch(`/chat/${chatId}/rename`, { title });
+export const deleteChat = (chatId) => API.delete(`/chat/${chatId}`);
+
+// ---------------- PDF / NOTES ----------------
+
+export const getNotes = () => API.get("/notes");
+export const uploadPDF = (formData, onUploadProgress) =>
+  API.post("/upload/pdf", formData, {
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "multipart/form-data",
     },
-    body: JSON.stringify(userData),
+    onUploadProgress,
   });
 
-  return response.json();
-};
+export default API;
