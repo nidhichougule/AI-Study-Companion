@@ -7,6 +7,7 @@ import {
   DATA_CHANGED_EVENT,
   getChatById,
   getChats,
+  getNotes,
   notifyDataChanged,
 } from "../services/api";
 
@@ -15,6 +16,7 @@ export default function Chat() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([]);
+  const [notes, setNotes] = useState([]);
   const [activeChatId, setActiveChatId] = useState(null);
   const [selectedPdfIds, setSelectedPdfIds] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -23,8 +25,10 @@ export default function Chat() {
 
   const loadDefaultChat = useCallback(async () => {
     try {
-      const chatsResponse = await getChats();
+      const [chatsResponse, notesResponse] = await Promise.all([getChats(), getNotes()]);
       const chats = chatsResponse.data || [];
+      setNotes(notesResponse.data || []);
+
       if (!chats.length) {
         setActiveChatId(null);
         setMessages([]);
@@ -179,15 +183,19 @@ export default function Chat() {
 
       <div style={styles.chatArea}>
         <div style={styles.scopeBar}>
-          <span style={styles.scopeLabel}>Scoped PDFs:</span>
+          <span style={styles.scopeLabel}>Scoped Documents:</span>
           {selectedPdfIds.length ? (
-            selectedPdfIds.map((pdfId) => (
-              <span key={pdfId} style={styles.scopeChip}>
-                {pdfId}
-              </span>
-            ))
+            selectedPdfIds.map((pdfId) => {
+              const matchedNote = notes.find((n) => n._id === pdfId);
+              const displayName = matchedNote ? matchedNote.fileName : pdfId;
+              return (
+                <span key={pdfId} style={styles.scopeChip} title={`Document ID: ${pdfId}`}>
+                  {displayName}
+                </span>
+              );
+            })
           ) : (
-            <span style={styles.scopeHint}>All uploaded PDFs</span>
+            <span style={styles.scopeHint}>All uploaded study material</span>
           )}
         </div>
 
@@ -198,10 +206,15 @@ export default function Chat() {
 
               {message.role === "ai" && message.sources?.length ? (
                 <div style={styles.metaBlock}>
-                  <div style={styles.metaTitle}>Sources</div>
+                  <div style={styles.metaTitle}>📚 Referenced Sources</div>
                   {message.sources.map((source, sourceIndex) => (
                     <div key={`${source.fileName}-${source.page}-${sourceIndex}`} style={styles.metaLine}>
-                      {source.fileName} · page {source.page}
+                      <strong>{source.fileName}</strong> · Page {source.page}
+                      {source.snippet ? (
+                        <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "2px", fontStyle: "italic" }}>
+                          "{source.snippet}"
+                        </div>
+                      ) : null}
                     </div>
                   ))}
                 </div>

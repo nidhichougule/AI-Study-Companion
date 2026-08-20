@@ -22,6 +22,11 @@ const noteSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    status: {
+      type: String,
+      enum: ["processing", "processed", "failed"],
+      default: "processed",
+    },
   },
   { timestamps: true }
 );

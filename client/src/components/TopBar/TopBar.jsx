@@ -1,4 +1,5 @@
 import styles from "./TopBar.module.css";
+import { useAuth } from "../../hooks/useAuth";
 
 const BellIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
@@ -8,6 +9,7 @@ const BellIcon = () => (
 );
 
 export default function TopBar() {
+  const { user } = useAuth();
   return (
     <header className={styles.topbar}>
       <div className={styles.breadcrumb}>
@@ -18,7 +20,7 @@ export default function TopBar() {
           <BellIcon />
           <span className={styles.notifDot}></span>
         </button>
-        <div className={styles.avatar}>S</div>
+        <div className={styles.avatar}>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</div>
       </div>
     </header>
   );

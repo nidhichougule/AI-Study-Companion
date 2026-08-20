@@ -38,16 +38,30 @@ const login = async (req, res) => {
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" });
 
+    const secret = process.env.JWT_SECRET || "secretkey";
     const token = jwt.sign(
       { id: user._id },
-      "secretkey",
+      secret,
       { expiresIn: "1d" }
     );
 
-    res.json({ token, user: { id: user._id, name: user.name } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-module.exports = { register, login };
+// GET CURRENT USER
+const getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { register, login, getMe };
