@@ -1,32 +1,46 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { registerUser } from "../services/api";
 
 export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const registerUser = async () => {
+  const handleRegister = async (e) => {
+    e?.preventDefault();
+    if (!name || !email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
+      await registerUser({
         name,
         email,
         password,
       });
 
-      alert("Registered successfully ✔");
+      alert("Registered successfully ✔ Please login.");
       navigate("/");
     } catch (err) {
-      alert("Registration failed ❌");
+      setError(err.response?.data?.message || "Registration failed ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
+      <form style={styles.card} onSubmit={handleRegister}>
         <h2>🧠 Create Account</h2>
+
+        {error && <div style={{ color: "#ef4444", fontSize: 13 }}>{error}</div>}
 
         <input
           placeholder="Name"
@@ -37,6 +51,7 @@ export default function Register() {
 
         <input
           placeholder="Email"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
@@ -50,14 +65,14 @@ export default function Register() {
           style={styles.input}
         />
 
-        <button onClick={registerUser} style={styles.button}>
-          Register
+        <button type="submit" style={styles.button} disabled={loading}>
+          {loading ? "Registering..." : "Register"}
         </button>
 
-        <p>
-          Already have an account? <Link to="/">Login</Link>
+        <p style={{ fontSize: 13, textAlign: "center", marginTop: 8 }}>
+          Already have an account? <Link to="/" style={{ color: "#3b82f6" }}>Login</Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }

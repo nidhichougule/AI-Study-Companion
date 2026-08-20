@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 import { DATA_CHANGED_EVENT, getChats, getNotes } from "../../services/api";
+import { useAuth } from "../../hooks/useAuth";
 
 const BookIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -87,6 +88,7 @@ export default function Sidebar({
   selectedPdfIds = [],
 }) {
   const navigate = useNavigate();
+  const { user, logout: authLogout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -242,12 +244,12 @@ export default function Sidebar({
           Settings
         </button>
         <div className={styles.profileRow}>
-          <div className={styles.avatar}>S</div>
+          <div className={styles.avatar}>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</div>
           <div className={styles.profileInfo}>
-            <span className={styles.profileName}>Student</span>
-            <span className={styles.profileEmail}>student@study.ai</span>
+            <span className={styles.profileName}>{user?.name || "User"}</span>
+            <span className={styles.profileEmail}>{user?.email || "user@study.ai"}</span>
           </div>
-          <button className={styles.logoutBtn} onClick={onLogout} title="Logout">
+          <button className={styles.logoutBtn} onClick={onLogout || authLogout} title="Logout">
             <LogoutIcon />
           </button>
         </div>

@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node testPhase1Security.js && node testPhase2RAG.js && node testRealWorldRAG.js && node testPhase3Phase4.js && node testPhase5Phase6.js",
+    "test:security": "node testPhase1Security.js",
+    "test:rag": "node testPhase2RAG.js",
+    "test:realworld": "node testRealWorldRAG.js",
+    "test:multidoc": "node testPhase3Phase4.js",
+    "test:quiz": "node testPhase5Phase6.js"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +24,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "groq-sdk": "^1.5.0",
     "jsonwebtoken": "^9.0.3",
     "langchain": "^1.4.5",
     "mongoose": "^9.6.2",

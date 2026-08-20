@@ -26,7 +26,6 @@ const splitParagraphToSentences = (paragraph) => {
   const sentences = normalized.split(SENTENCE_SPLIT_REGEX).map((item) => item.trim()).filter(Boolean);
   if (sentences.length > 1) return sentences;
 
-  // Fallback for text that lacks clear punctuation.
   const words = normalized.split(/\s+/).filter(Boolean);
   if (words.length <= 40) return [normalized];
 
@@ -41,8 +40,8 @@ const splitParagraphToSentences = (paragraph) => {
 const buildChunksFromPage = ({
   pageText,
   pageNumber,
-  maxChunkChars = 900,
-  minChunkChars = 250,
+  maxChunkChars = 800,
+  minChunkChars = 200,
   overlapSentenceCount = 1,
 }) => {
   const paragraphs = normalizeWhitespace(pageText)
@@ -86,7 +85,6 @@ const buildChunksFromPage = ({
     }
   }
 
-  // Flush remaining text.
   currentSentences = currentSentences.filter(Boolean);
   flushChunk();
 
@@ -107,20 +105,25 @@ const deduplicateChunks = (chunks) => {
 const splitPdfIntoChunks = (fullText) => {
   const pages = splitPdfIntoPages(fullText);
 
-  const chunkItems = pages.flatMap((pageText, index) =>
+  const rawChunks = pages.flatMap((pageText, index) =>
     buildChunksFromPage({
       pageText,
       pageNumber: index + 1,
     })
   );
 
-  return deduplicateChunks(chunkItems);
+  const deduplicated = deduplicateChunks(rawChunks);
+
+  return deduplicated.map((chunk, chunkIndex) => ({
+    ...chunk,
+    chunkIndex,
+  }));
 };
 
-// Backward-compatible legacy export used by local scripts.
 const splitIntoChunks = (text) => splitPdfIntoChunks(text).map((chunk) => chunk.text);
 
 module.exports = {
   splitPdfIntoChunks,
   splitIntoChunks,
+  normalizeWhitespace,
 };

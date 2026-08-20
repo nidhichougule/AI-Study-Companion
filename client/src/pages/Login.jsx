@@ -1,34 +1,47 @@
 import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { loginUser } from "../services/api";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const loginUser = async () => {
+  const handleLogin = async (e) => {
+    e?.preventDefault();
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
-        email,
-        password,
-      });
-
-      localStorage.setItem("token", res.data.token);
+      const res = await loginUser({ email, password });
+      login(res.data.token, res.data.user);
       navigate("/dashboard");
     } catch (err) {
-      alert("Login failed ❌");
+      setError(err.response?.data?.message || "Login failed ❌");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
+      <form style={styles.card} onSubmit={handleLogin}>
         <h2>🧠 AI Study Companion</h2>
         <p>Login to continue</p>
 
+        {error && <div style={{ color: "#ef4444", fontSize: 13 }}>{error}</div>}
+
         <input
           placeholder="Email"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={styles.input}
@@ -42,10 +55,14 @@ export default function Login() {
           style={styles.input}
         />
 
-        <button onClick={loginUser} style={styles.button}>
-          Login
+        <button type="submit" style={styles.button} disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
-      </div>
+
+        <p style={{ fontSize: 13, textAlign: "center", marginTop: 8 }}>
+          Don't have an account? <Link to="/register" style={{ color: "#3b82f6" }}>Register</Link>
+        </p>
+      </form>
     </div>
   );
 }
