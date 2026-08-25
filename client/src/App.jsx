@@ -10,12 +10,13 @@ import Quiz from "./pages/Quiz";
 
 function ProtectedRoute({ children }) {
   const { token, loading } = useAuth();
+  const hasLocalToken = !!localStorage.getItem("token");
 
   if (loading) {
     return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "white", background: "#0f172a" }}>Loading user session...</div>;
   }
 
-  return token ? children : <Navigate to="/" replace />;
+  return (token || hasLocalToken) ? children : <Navigate to="/" replace />;
 }
 
 export default function App() {

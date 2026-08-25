@@ -37,12 +37,14 @@ export function AuthProvider({ children }) {
     localStorage.setItem("token", newToken);
     setToken(newToken);
     setUser(userData);
+    setLoading(false);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    setLoading(false);
   };
 
   return (

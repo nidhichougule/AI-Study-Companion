@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
@@ -9,7 +9,13 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, token, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (token && !authLoading) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [token, authLoading, navigate]);
 
   const handleLogin = async (e) => {
     e?.preventDefault();
@@ -22,10 +28,17 @@ export default function Login() {
 
     try {
       const res = await loginUser({ email, password });
-      login(res.data.token, res.data.user);
-      navigate("/dashboard");
+      if (res.data?.token) {
+        login(res.data.token, res.data.user);
+        navigate("/dashboard", { replace: true });
+      } else {
+        setError("Invalid response from server.");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed ❌");
+      setError(
+        err.response?.data?.message ||
+          (err.code === "ERR_NETWORK" ? "Cannot connect to backend server. Please ensure port 5000 is running." : "Login failed ❌")
+      );
     } finally {
       setLoading(false);
     }
