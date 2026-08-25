@@ -38,25 +38,27 @@ const generateAnswer = async (prompt, options = {}) => {
       console.log(`[RAG/Groq] LLM response generated in ${elapsedMs}ms using model=${modelName} | outputChars=${text.length}`);
       return text;
     } catch (error) {
-      console.error(`[RAG/Groq Error] Groq API call failed (${error.message}). Attempting fallback model...`);
+      console.error(`[RAG/Groq Error] Groq API call failed (${error.message}).`);
       
-      // Secondary Groq model fallback if primary model hits rate limit or error
-      if (modelName !== "groq/compound-mini") {
+      // Pause & retry if rate limited
+      if (error.status === 429 || String(error.message).includes("rate_limit")) {
+        console.log(`[RAG/Groq] Rate limit reached. Pausing 2.5s before retry...`);
+        await new Promise((resolve) => setTimeout(resolve, 2500));
         try {
-          const fallbackCompletion = await groqClient.chat.completions.create({
+          const retryCompletion = await groqClient.chat.completions.create({
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: prompt },
             ],
-            model: "groq/compound-mini",
+            model: modelName,
             temperature,
             max_tokens: maxTokens,
           });
-          const text = fallbackCompletion.choices[0]?.message?.content?.trim() || "";
-          console.log(`[RAG/Groq] Fallback groq/compound-mini response generated in ${Date.now() - startedAt}ms`);
+          const text = retryCompletion.choices[0]?.message?.content?.trim() || "";
+          console.log(`[RAG/Groq] Retry response generated in ${Date.now() - startedAt}ms`);
           return text;
-        } catch (fallbackError) {
-          console.error(`[RAG/Groq Error] Groq fallback failed (${fallbackError.message})`);
+        } catch (retryError) {
+          console.error(`[RAG/Groq Error] Groq rate limit retry failed (${retryError.message})`);
         }
       }
     }

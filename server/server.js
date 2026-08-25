@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
+dotenv.config();
+
 const connectDB = require("./config/db");
 const Note = require("./models/Note");
 
@@ -13,8 +15,6 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const quizRoutes = require("./routes/quizRoutes");
 const retrievalRoutes = require("./routes/retrievalRoutes");
 const progressRoutes = require("./routes/progressRoutes");
-
-dotenv.config();
 
 const app = express();
 

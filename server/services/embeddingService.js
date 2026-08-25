@@ -1,7 +1,9 @@
 const { HfInference } = require("@huggingface/inference");
 
-const hfToken = process.env.HF_TOKEN || process.env.HF_API_KEY;
-const hf = new HfInference(hfToken);
+const getHfClient = () => {
+  const hfToken = process.env.HF_TOKEN || process.env.HF_API_KEY;
+  return new HfInference(hfToken);
+};
 
 const VECTOR_DIMENSION = 384;
 
@@ -46,27 +48,45 @@ async function generateEmbedding(text) {
     throw new Error("Embedding input text is required");
   }
 
-  try {
-    const result = await hf.featureExtraction({
-      model: "sentence-transformers/all-MiniLM-L6-v2",
-      inputs: inputText,
-    });
+  const candidateModels = [
+    "sentence-transformers/all-MiniLM-L6-v2",
+    "BAAI/bge-small-en-v1.5",
+  ];
 
-    const embedding = normalizeVector(result);
-    if (Array.isArray(embedding) && embedding.length > 0) {
-      console.log(`[RAG/Embedding/RealProvider] HuggingFace all-MiniLM-L6-v2 embedding generated in ${Date.now() - startedAt}ms | dim=${embedding.length}`);
-      return embedding;
+  let lastError = null;
+
+  for (const model of candidateModels) {
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        const hf = getHfClient();
+        const result = await hf.featureExtraction({
+          model,
+          inputs: inputText,
+        });
+
+        const embedding = normalizeVector(result);
+        if (Array.isArray(embedding) && embedding.length > 0) {
+          console.log(
+            `[RAG/Embedding/RealProvider] HuggingFace embedding generated in ${Date.now() - startedAt}ms (model=${model}, attempt=${attempt}) | dim=${embedding.length}`
+          );
+          return embedding;
+        }
+        throw new Error("Empty embedding returned from feature extraction provider");
+      } catch (error) {
+        lastError = error;
+        console.warn(`[RAG/Embedding Warning] Model "${model}" (attempt ${attempt}) failed: ${error.message}`);
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
     }
-    throw new Error("Empty embedding returned from feature extraction provider");
-  } catch (error) {
-    // Only use offline fallback if explicitly requested in test mode (e.g. offline CI environments)
-    if (process.env.TEST_OFFLINE === "true") {
-      console.warn(`[RAG/Embedding Warning] Test offline mode active. Using fallback vector.`);
-      return generateFallbackVector(inputText);
-    }
-    console.error(`[RAG/Embedding Error] Real embedding provider failed: ${error.message}`);
-    throw new Error(`Embedding generation failed: ${error.message}`);
   }
+
+  // Only use offline fallback if explicitly requested in test mode (e.g. offline CI environments)
+  if (process.env.TEST_OFFLINE === "true") {
+    console.warn(`[RAG/Embedding Warning] Test offline mode active. Using fallback vector.`);
+    return generateFallbackVector(inputText);
+  }
+  console.error(`[RAG/Embedding Error] Real embedding provider failed for all candidate models: ${lastError?.message}`);
+  throw new Error(`Embedding generation failed: ${lastError?.message}`);
 }
 
 module.exports = { generateEmbedding, normalizeVector, generateFallbackVector };
