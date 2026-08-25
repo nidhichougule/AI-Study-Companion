@@ -25,7 +25,7 @@ export default function UploadCard() {
 
   const uploadFile = async (file) => {
     if (!file) return;
-    if (file.type !== "application/pdf") {
+    if (file.type !== "application/pdf" && !file.name?.toLowerCase().endsWith(".pdf")) {
       showToast("Only PDF files are supported.", "error");
       return;
     }

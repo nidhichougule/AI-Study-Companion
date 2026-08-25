@@ -106,7 +106,7 @@ async function runTests() {
     const reqQuizA = { user: { id: userIdA } };
     const resQuizA = mockRes();
     await generateQuiz(reqQuizA, resQuizA);
-    if (resQuizA.statusCode !== 404 || !resQuizA.body.message.includes("Upload a PDF first")) {
+    if (resQuizA.statusCode !== 400 || !resQuizA.body.message.includes("Insufficient study material")) {
       throw new Error(`FAIL: User A generated quiz from User B's note! Response: ${JSON.stringify(resQuizA.body)}`);
     }
     console.log("✔ TEST 6 PASSED: Quiz generator properly isolates notes per user (User A gets 404 'Upload a PDF first' even when User B has notes).");

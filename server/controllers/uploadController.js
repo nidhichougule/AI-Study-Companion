@@ -32,13 +32,20 @@ const uploadPDF = async (req, res) => {
       return res.status(400).json({ message: "No extractable text found in PDF." });
     }
 
-    const note = await Note.create({
-      userId: req.user.id,
-      fileName: req.file.originalname,
-      chunkCount: chunkItems.length,
-      pageCount,
-      pdfTextLength: pdfData.text.length,
-    });
+    let note;
+    try {
+      note = await Note.create({
+        userId: req.user.id,
+        fileName: req.file.originalname,
+        chunkCount: chunkItems.length,
+        pageCount,
+        pdfTextLength: pdfData.text.length,
+        status: "processing",
+      });
+    } catch (dbErr) {
+      console.error("[Upload Error] Note creation in MongoDB failed:", dbErr.message);
+      throw dbErr;
+    }
 
     // 2. Generate Embeddings for each chunk
     const embeddings = [];
@@ -56,6 +63,9 @@ const uploadPDF = async (req, res) => {
       noteId: note._id,
     });
 
+    note.status = "processed";
+    await note.save();
+
     console.log(`[Upload] Successfully processed noteId=${note._id} with ${chunkItems.length} chunks`);
 
     res.status(201).json({
@@ -64,13 +74,14 @@ const uploadPDF = async (req, res) => {
       fileName: note.fileName,
       pageCount: note.pageCount,
       chunkCount: note.chunkCount,
+      status: note.status,
     });
 
   } catch (error) {
-    console.error("[Upload Error] PDF processing failed:", error.message);
+    console.error("[Upload Error] PDF processing failed:", error.message, error.stack);
 
     res.status(500).json({
-      message: "PDF processing failed. Please ensure the file is a valid PDF.",
+      message: error.message || "PDF processing failed. Please ensure the file is a valid PDF.",
     });
   } finally {
     if (req.file?.path && fs.existsSync(req.file.path)) {

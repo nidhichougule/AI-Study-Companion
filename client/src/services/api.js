@@ -40,9 +40,6 @@ export const getNotes = () => API.get("/notes");
 export const deleteNote = (id) => API.delete(`/notes/${id}`);
 export const uploadPDF = (formData, onUploadProgress) =>
   API.post("/upload/pdf", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
     onUploadProgress,
   });
 
