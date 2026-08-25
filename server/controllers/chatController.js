@@ -162,8 +162,10 @@ const askQuestionInternal = async ({ question, userId, chatId, pdfIds, strictCha
     }
   }
 
-  // Determine effective PDF IDs (combine chat's saved pdfIds and request pdfIds, validated against user)
-  const inputPdfIds = mergePdfIds(chat?.pdfIds || [], pdfIds || []);
+  // Determine effective PDF IDs (prefer explicit request pdfIds if provided, fallback to chat's saved pdfIds)
+  const inputPdfIds = (Array.isArray(pdfIds) && pdfIds.length > 0)
+    ? pdfIds
+    : (chat?.pdfIds || []);
   const validatedPdfIds = await validateUserPdfIds(inputPdfIds, userId);
 
   const { retrievedChunks, sources, hasRelevantContext } = await retrieveRelevantChunks({
@@ -172,6 +174,8 @@ const askQuestionInternal = async ({ question, userId, chatId, pdfIds, strictCha
     topK: 5,
     noteIds: validatedPdfIds.length ? validatedPdfIds : undefined,
   });
+
+  console.log(`[BrowserRAG] userId=${userId} requestedPdfIds=${JSON.stringify(pdfIds || [])} validatedNoteIds=${JSON.stringify(validatedPdfIds)} retrievedChunks=${retrievedChunks.length} hasRelevantContext=${hasRelevantContext}`);
 
   let answer = "";
   if (!hasRelevantContext || !retrievedChunks.length) {
