@@ -40,6 +40,13 @@ const uploadPDF = async (req, res) => {
         chunkCount: chunkItems.length,
         pageCount,
         pdfTextLength: pdfData.text.length,
+        extractedText: pdfData.text || "",
+        chunks: chunkItems.map((item, i) => ({
+          chunkId: `chunk-${item.chunkIndex ?? i}`,
+          text: item.text,
+          page: Number(item.page) || 1,
+          chunkIndex: Number(item.chunkIndex ?? i),
+        })),
         status: "processing",
       });
     } catch (dbErr) {

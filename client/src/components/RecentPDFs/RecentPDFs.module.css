@@ -1,15 +1,199 @@
-.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.title { font-size: 15px; font-weight: 700; color: #e2e8f0; margin: 0; letter-spacing: -0.2px; }
-.list { background: #111827; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; overflow: hidden; }
-.row { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.15s; cursor: pointer; }
-.row:last-child { border-bottom: none; }
-.row:hover { background: rgba(255,255,255,0.03); }
-.iconWrap { width: 38px; height: 38px; border-radius: 10px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); display: flex; align-items: center; justify-content: center; color: #f87171; flex-shrink: 0; }
-.info { flex: 1; min-width: 0; }
-.pdfName { font-size: 13.5px; font-weight: 600; color: #cbd5e1; margin: 0 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.meta { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: #475569; }
-.dot { color: #334155; }
-.right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.chatBadge { display: flex; align-items: center; gap: 4px; font-size: 11.5px; color: #64748b; }
-.askBtn { padding: 6px 14px; background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, color 0.15s; }
-.askBtn:hover { background: rgba(99,102,241,0.28); color: #a5b4fc; }
+.wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.list {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.emptyState {
+  padding: 32px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.emptyIcon {
+  font-size: 28px;
+  margin-bottom: 4px;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.emptySub {
+  font-size: 12.5px;
+  color: var(--text-sub);
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: var(--transition-fast);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f87171;
+  flex-shrink: 0;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pdfName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-sub);
+  flex-wrap: wrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #34d399;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  background: #34d399;
+  border-radius: 50%;
+}
+
+.dot {
+  color: var(--text-sub);
+  opacity: 0.5;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.chatBadge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.askBtn {
+  padding: 6px 14px;
+  background: var(--primary-light);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.askBtn:hover {
+  background: rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
+}
+
+.deleteBtn {
+  background: var(--error-light);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.deleteBtn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+

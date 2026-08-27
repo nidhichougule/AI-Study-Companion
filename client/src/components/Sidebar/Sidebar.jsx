@@ -1,13 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 import { DATA_CHANGED_EVENT, getChats, getNotes } from "../../services/api";
 import { useAuth } from "../../hooks/useAuth";
 
 const BookIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
+const DashboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+    <rect x="14" y="14" width="7" height="7" rx="1.5" />
+    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+  </svg>
+);
+const QuizIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
   </svg>
 );
 const PlusIcon = () => (
@@ -23,20 +38,14 @@ const SearchIcon = () => (
   </svg>
 );
 const ChatIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 const FileIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
-  </svg>
-);
-const SettingsIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3" />
   </svg>
 );
 const LogoutIcon = () => (
@@ -86,8 +95,11 @@ export default function Sidebar({
   showChatActions = false,
   activeChatId = null,
   selectedPdfIds = [],
+  mobileOpen = false,
+  onCloseMobile,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout: authLogout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState([]);
@@ -126,6 +138,7 @@ export default function Sidebar({
   );
 
   const handleOpenChat = (chat) => {
+    if (onCloseMobile) onCloseMobile();
     if (onSelectChat) {
       onSelectChat(chat);
       return;
@@ -134,6 +147,7 @@ export default function Sidebar({
   };
 
   const handleSelectPdf = (note) => {
+    if (onCloseMobile) onCloseMobile();
     if (onSelectPdf) {
       onSelectPdf(note);
       return;
@@ -151,109 +165,148 @@ export default function Sidebar({
     onDeleteChat?.(chat);
   };
 
+  const navItems = [
+    { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon /> },
+    { label: "AI Chat", path: "/chat", icon: <ChatIcon /> },
+    { label: "Documents", path: "/upload", icon: <FileIcon /> },
+    { label: "Quiz Practice", path: "/quiz", icon: <QuizIcon /> },
+  ];
+
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.logo}>
-        <div className={styles.logoIcon}>
-          <BookIcon />
-        </div>
-        <span className={styles.logoText}>StudyAI</span>
-      </div>
-
-      <button
-        className={styles.newChatBtn}
-        onClick={() => {
-          if (onNewChat) {
-            onNewChat();
-            return;
-          }
-          navigate("/chat");
-        }}
-      >
-        <PlusIcon />
-        New Chat
-      </button>
-
-      <div className={styles.searchWrap}>
-        <SearchIcon />
-        <input
-          className={styles.searchInput}
-          placeholder="Search chats..."
-          value={searchQuery}
-          onChange={(event) => setSearchQuery(event.target.value)}
-        />
-      </div>
-
-      <div className={styles.section}>
-        <p className={styles.sectionLabel}>Recent Chats</p>
-        <ul className={styles.chatList}>
-          {filteredChats.map((chat) => (
-            <li
-              key={chat._id}
-              className={`${styles.chatItem} ${activeChatId === chat._id ? styles.chatItemActive : ""}`}
-              onClick={() => handleOpenChat(chat)}
-            >
-              <span className={styles.itemIcon}>
-                <ChatIcon />
-              </span>
-              <div className={styles.chatMeta}>
-                <span className={styles.chatTitle}>{chat.title || "New Chat"}</span>
-                <span className={styles.chatTime}>{formatRelativeTime(chat.updatedAt || chat.createdAt)}</span>
-              </div>
-              {showChatActions ? (
-                <div className={styles.chatActions}>
-                  <button className={styles.chatActionBtn} onClick={(event) => handleRename(event, chat)} title="Rename chat">
-                    <EditIcon />
-                  </button>
-                  <button className={styles.chatActionBtn} onClick={(event) => handleDelete(event, chat)} title="Delete chat">
-                    <TrashIcon />
-                  </button>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className={styles.section}>
-        <p className={styles.sectionLabel}>Recent PDFs</p>
-        <ul className={styles.chatList}>
-          {notes.slice(0, 8).map((pdf) => (
-            <li
-              key={pdf._id}
-              className={`${styles.chatItem} ${selectedPdfIds.includes(pdf._id) ? styles.chatItemSelected : ""}`}
-              onClick={() => handleSelectPdf(pdf)}
-            >
-              <span className={styles.itemIcon}>
-                <FileIcon />
-              </span>
-              <div className={styles.chatMeta}>
-                <span className={styles.chatTitle}>{pdf.fileName}</span>
-                <span className={styles.chatTime}>
-                  {Number(pdf.pageCount) || 0} pages · {Number(pdf.chunkCount) || 0} chunks
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className={styles.bottomSection}>
-        <button className={styles.bottomBtn}>
-          <SettingsIcon />
-          Settings
-        </button>
-        <div className={styles.profileRow}>
-          <div className={styles.avatar}>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</div>
-          <div className={styles.profileInfo}>
-            <span className={styles.profileName}>{user?.name || "User"}</span>
-            <span className={styles.profileEmail}>{user?.email || "user@study.ai"}</span>
+    <>
+      {mobileOpen && <div className={styles.backdrop} onClick={onCloseMobile} />}
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.mobileOpen : ""}`}>
+        <div className={styles.logo}>
+          <div className={styles.logoIcon}>
+            <BookIcon />
           </div>
-          <button className={styles.logoutBtn} onClick={onLogout || authLogout} title="Logout">
-            <LogoutIcon />
-          </button>
+          <span className={styles.logoText}>StudyAI</span>
+          <span className={styles.proBadge}>PRO</span>
         </div>
-      </div>
-    </aside>
+
+        {/* MAIN ROUTE NAVIGATION */}
+        <nav className={styles.navMenu}>
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
+                onClick={onCloseMobile}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navLabel}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className={styles.dividerNav} />
+
+        <button
+          className={styles.newChatBtn}
+          onClick={() => {
+            if (onCloseMobile) onCloseMobile();
+            if (onNewChat) {
+              onNewChat();
+              return;
+            }
+            navigate("/chat");
+          }}
+        >
+          <PlusIcon />
+          New Chat
+        </button>
+
+        <div className={styles.searchWrap}>
+          <SearchIcon />
+          <input
+            className={styles.searchInput}
+            placeholder="Search chats..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+        </div>
+
+        <div className={styles.scrollSection}>
+          <div className={styles.section}>
+            <p className={styles.sectionLabel}>Recent Chats ({filteredChats.length})</p>
+            <ul className={styles.chatList}>
+              {filteredChats.length === 0 ? (
+                <li className={styles.emptyItem}>No chats found</li>
+              ) : (
+                filteredChats.map((chat) => (
+                  <li
+                    key={chat._id}
+                    className={`${styles.chatItem} ${activeChatId === chat._id ? styles.chatItemActive : ""}`}
+                    onClick={() => handleOpenChat(chat)}
+                  >
+                    <span className={styles.itemIcon}>
+                      <ChatIcon />
+                    </span>
+                    <div className={styles.chatMeta}>
+                      <span className={styles.chatTitle}>{chat.title || "New Chat"}</span>
+                      <span className={styles.chatTime}>{formatRelativeTime(chat.updatedAt || chat.createdAt)}</span>
+                    </div>
+                    {showChatActions ? (
+                      <div className={styles.chatActions}>
+                        <button className={styles.chatActionBtn} onClick={(event) => handleRename(event, chat)} title="Rename chat">
+                          <EditIcon />
+                        </button>
+                        <button className={styles.chatActionBtn} onClick={(event) => handleDelete(event, chat)} title="Delete chat">
+                          <TrashIcon />
+                        </button>
+                      </div>
+                    ) : null}
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+
+          <div className={styles.section}>
+            <p className={styles.sectionLabel}>Uploaded PDFs ({notes.length})</p>
+            <ul className={styles.chatList}>
+              {notes.length === 0 ? (
+                <li className={styles.emptyItem}>No PDFs uploaded</li>
+              ) : (
+                notes.slice(0, 8).map((pdf) => (
+                  <li
+                    key={pdf._id}
+                    className={`${styles.chatItem} ${selectedPdfIds.includes(pdf._id) ? styles.chatItemSelected : ""}`}
+                    onClick={() => handleSelectPdf(pdf)}
+                  >
+                    <span className={styles.itemIcon}>
+                      <FileIcon />
+                    </span>
+                    <div className={styles.chatMeta}>
+                      <span className={styles.chatTitle}>{pdf.fileName}</span>
+                      <span className={styles.chatTime}>
+                        {Number(pdf.pageCount) || 0} p · {Number(pdf.chunkCount) || 0} chunks
+                      </span>
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </div>
+
+        <div className={styles.bottomSection}>
+          <div className={styles.profileRow}>
+            <div className={styles.avatar}>{user?.name ? user.name.charAt(0).toUpperCase() : "U"}</div>
+            <div className={styles.profileInfo}>
+              <span className={styles.profileName}>{user?.name || "Student"}</span>
+              <span className={styles.profileEmail}>{user?.email || "student@study.ai"}</span>
+            </div>
+            <button className={styles.logoutBtn} onClick={onLogout || authLogout} title="Logout">
+              <LogoutIcon />
+            </button>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
+

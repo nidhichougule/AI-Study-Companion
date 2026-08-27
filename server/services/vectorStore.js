@@ -105,6 +105,65 @@ const buildChromaWhereFilter = ({ userId, noteIds }) => {
   return { $and: filters };
 };
 
+const ensureInMemoryRehydrated = async ({ userId, noteIds }) => {
+  try {
+    const mongoose = require("mongoose");
+    if (mongoose.connection.readyState !== 1) {
+      return;
+    }
+    const Note = require("../models/Note");
+    const { generateEmbedding } = require("./embeddingService");
+
+    const query = { status: "processed" };
+    if (userId && mongoose.isValidObjectId(userId)) {
+      query.userId = userId;
+    }
+    if (Array.isArray(noteIds) && noteIds.length) {
+      const validNoteIds = noteIds.filter((id) => mongoose.isValidObjectId(id));
+      if (validNoteIds.length) {
+        query._id = { $in: validNoteIds };
+      }
+    }
+
+    const notes = await Note.find(query);
+    for (const note of notes) {
+      const noteIdStr = note._id.toString();
+      let hasInMemory = false;
+      for (const item of inMemoryStore.values()) {
+        if (item.metadata.noteId === noteIdStr) {
+          hasInMemory = true;
+          break;
+        }
+      }
+
+      if (!hasInMemory && note.chunks && note.chunks.length > 0) {
+        console.log(`[VectorStore Auto-Rehydrate] Loading ${note.chunks.length} chunks into memory for note "${note.fileName}" (noteId=${note._id})`);
+        const chunkItems = note.chunks.map((c) => ({
+          text: c.text,
+          page: c.page,
+          chunkIndex: c.chunkIndex,
+        }));
+
+        const embeddings = [];
+        for (const chunkItem of chunkItems) {
+          const emb = await generateEmbedding(chunkItem.text);
+          embeddings.push(emb);
+        }
+
+        await addChunksToDB({
+          chunkItems,
+          embeddings,
+          fileName: note.fileName,
+          userId: note.userId,
+          noteId: note._id,
+        });
+      }
+    }
+  } catch (err) {
+    console.warn(`[VectorStore Warning] Memory rehydration failed: ${err.message}`);
+  }
+};
+
 const searchSimilarChunks = async ({ queryEmbedding, topK = 5, userId, noteIds }) => {
   const startedAt = Date.now();
   const collection = await getCollection();
@@ -124,6 +183,9 @@ const searchSimilarChunks = async ({ queryEmbedding, topK = 5, userId, noteIds }
       console.warn(`[VectorStore Warning] ChromaDB query failed (${err.message}). Querying in-memory store.`);
     }
   }
+
+  // Ensure in-memory store is rehydrated from MongoDB if process was restarted
+  await ensureInMemoryRehydrated({ userId, noteIds });
 
   // Query in-memory vector store with strict userId and noteIds filtering
   const targetUserId = userId ? String(userId) : null;

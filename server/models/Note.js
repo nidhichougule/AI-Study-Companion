@@ -22,6 +22,18 @@ const noteSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    extractedText: {
+      type: String,
+      default: "",
+    },
+    chunks: [
+      {
+        chunkId: String,
+        text: String,
+        page: Number,
+        chunkIndex: Number,
+      },
+    ],
     status: {
       type: String,
       enum: ["processing", "processed", "failed"],

@@ -1,74 +1,221 @@
 .main {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 28px 48px;
+  padding: 24px 28px 48px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
-.main::-webkit-scrollbar { width: 5px; }
-.main::-webkit-scrollbar-track { background: transparent; }
-.main::-webkit-scrollbar-thumb { background: #1e2a3b; border-radius: 4px; }
+
+.welcomeBanner {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(22, 30, 46, 0.95) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.welcomeBanner::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  pointer-events: none;
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #a5b4fc;
+  background: var(--primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.docCountBadge {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-sub);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
 
 .welcomeHeading {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
-  color: #f1f5f9;
+  color: var(--text-main);
   margin: 0 0 8px;
-  letter-spacing: -0.5px;
-  background: linear-gradient(90deg, #f1f5f9 0%, #a5b4fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.4px;
 }
+
 .welcomeSub {
-  font-size: 14.5px;
-  color: #64748b;
+  font-size: 14px;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
+  max-width: 720px;
 }
 
 .statsRow {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 14px;
 }
+
 .statCard {
-  background: #111827;
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 13px;
-  padding: 18px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  transition: border-color 0.2s, transform 0.2s;
+  gap: 10px;
+  transition: var(--transition-smooth);
 }
+
 .statCard:hover {
-  border-color: rgba(99,102,241,0.3);
-  transform: translateY(-1px);
+  border-color: var(--border-color-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
 }
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.statIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .statValue {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 800;
-  color: #e2e8f0;
+  color: var(--text-main);
   letter-spacing: -0.5px;
 }
+
 .statLabel {
-  font-size: 11.5px;
-  color: #64748b;
-  font-weight: 500;
+  font-size: 12px;
+  color: var(--text-sub);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.section { }
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
 
 .sectionTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text-main);
   margin: 0 0 12px;
   letter-spacing: -0.2px;
+}
+
+.sectionLink {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.sectionLink:hover {
+  color: #a5b4fc;
+}
+
+.attemptsCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding: 8px 16px;
+}
+
+.attemptRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.attemptRow:last-child {
+  border-bottom: none;
+}
+
+.attemptLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.attemptTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.attemptMeta {
+  font-size: 11.5px;
+  color: var(--text-sub);
+}
+
+.scorePill {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.scoreHigh {
+  background: var(--success-light);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.scoreLow {
+  background: var(--error-light);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .promptGrid {
@@ -76,30 +223,53 @@
   flex-wrap: wrap;
   gap: 10px;
 }
+
 .promptChip {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #111827;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 100px;
-  color: #94a3b8;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  color: var(--text-muted);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+  transition: var(--transition-fast);
   white-space: nowrap;
 }
+
 .promptChip:hover {
-  border-color: rgba(99,102,241,0.4);
-  color: #e2e8f0;
-  background: rgba(99,102,241,0.08);
+  border-color: var(--border-color-hover);
+  color: var(--text-main);
+  background: var(--primary-light);
   transform: translateY(-1px);
 }
-.promptEmoji { font-size: 15px; }
 
-@media (max-width: 900px) {
-  .statsRow { grid-template-columns: repeat(2, 1fr); }
-  .main { padding: 20px 16px 40px; }
+.promptEmoji {
+  font-size: 15px;
 }
+
+.promptText {
+  font-weight: 500;
+}
+
+@media (max-width: 1024px) {
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+  .main {
+    padding: 16px 16px 36px;
+  }
+  .welcomeHeading {
+    font-size: 20px;
+  }
+}
+

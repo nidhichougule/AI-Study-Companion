@@ -18,7 +18,7 @@ const formatRelativeTime = (value) => {
 
   if (diffMs < minute) return "Just now";
   if (diffMs < hour) return `${Math.floor(diffMs / minute)}m ago`;
-  if (diffMs < day) return `${Math.floor(diffMs / hour)}h ago`;
+  if (diffMs < day) return `${Math.floor(diffMs / hour)}d ago`;
   return `${Math.floor(diffMs / day)}d ago`;
 };
 
@@ -39,35 +39,55 @@ export default function RecentChats({ chats = [], onOpenChat }) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <h3 className={styles.title}>Recent Conversations</h3>
-        <button className={styles.viewAll}>
-          View all <ArrowIcon />
-        </button>
+        <h3 className={styles.title}>Recent AI Conversations ({chats.length})</h3>
+        {chats.length > 0 && (
+          <button className={styles.viewAll} onClick={() => onOpenChat?.(conversations[0]?.id)}>
+            View all <ArrowIcon />
+          </button>
+        )}
       </div>
       <div className={styles.grid}>
-        {conversations.map((conversation) => (
-          <div key={conversation.id} className={styles.card} style={{ "--accent": conversation.color }}>
-            <div className={styles.cardTop}>
-              <div className={styles.dot} style={{ background: conversation.color }}></div>
-              <span className={styles.time}>{conversation.time}</span>
-            </div>
-            <p className={styles.convTitle}>{conversation.title}</p>
-            <p className={styles.preview}>{conversation.preview}</p>
-            <div className={styles.footer}>
-              <div className={styles.tags}>
-                {conversation.tags.map((tag) => (
-                  <span key={tag} className={styles.tag}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <button className={styles.openBtn} onClick={() => onOpenChat?.(conversation.id)}>
-                Open
-              </button>
-            </div>
+        {conversations.length === 0 ? (
+          <div className={styles.emptyStateCard}>
+            💬 No previous chat sessions. Click <strong>"New Chat"</strong> in the sidebar or select a suggested prompt to get started!
           </div>
-        ))}
+        ) : (
+          conversations.map((conversation) => (
+            <div
+              key={conversation.id}
+              className={styles.card}
+              style={{ "--accent": conversation.color }}
+              onClick={() => onOpenChat?.(conversation.id)}
+            >
+              <div className={styles.cardTop}>
+                <div className={styles.dot} style={{ background: conversation.color }}></div>
+                <span className={styles.time}>{conversation.time}</span>
+              </div>
+              <p className={styles.convTitle}>{conversation.title}</p>
+              <p className={styles.preview}>{conversation.preview}</p>
+              <div className={styles.footer}>
+                <div className={styles.tags}>
+                  {conversation.tags.map((tag) => (
+                    <span key={tag} className={styles.tag}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <button
+                  className={styles.openBtn}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenChat?.(conversation.id);
+                  }}
+                >
+                  Open Chat
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
 }
+

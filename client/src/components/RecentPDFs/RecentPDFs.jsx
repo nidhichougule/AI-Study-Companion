@@ -1,8 +1,9 @@
+import { useState } from "react";
 import styles from "./RecentPDFs.module.css";
 import { deleteNote, notifyDataChanged } from "../../services/api";
 
 const FileIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
     <polyline points="14 2 14 8 20 8" />
     <line x1="16" y1="13" x2="8" y2="13" />
@@ -36,17 +37,22 @@ const formatDate = (value) => {
 };
 
 export default function RecentPDFs({ notes = [], chats = [], onSelectPdf, showDelete = true }) {
+  const [deletingId, setDeletingId] = useState(null);
+
   const handleDelete = async (e, noteId, fileName) => {
     e.stopPropagation();
-    if (!window.confirm(`Are you sure you want to delete "${fileName}"? This will also remove its vector embeddings.`)) {
+    if (!window.confirm(`Are you sure you want to delete "${fileName}"? This will permanently remove its vector embeddings.`)) {
       return;
     }
+    setDeletingId(noteId);
     try {
       await deleteNote(noteId);
       notifyDataChanged();
     } catch (err) {
       console.error("Delete note failed:", err);
-      alert("Failed to delete note.");
+      alert("Failed to delete PDF note.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -70,8 +76,10 @@ export default function RecentPDFs({ notes = [], chats = [], onSelectPdf, showDe
       </div>
       <div className={styles.list}>
         {rows.length === 0 ? (
-          <div style={{ padding: "24px", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
-            No study material uploaded yet. Drop a PDF above to get started.
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📄</div>
+            <p className={styles.emptyTitle}>No documents uploaded yet</p>
+            <p className={styles.emptySub}>Drop a PDF note or textbook above to start asking questions!</p>
           </div>
         ) : (
           rows.map((pdf) => (
@@ -82,7 +90,10 @@ export default function RecentPDFs({ notes = [], chats = [], onSelectPdf, showDe
               <div className={styles.info}>
                 <p className={styles.pdfName}>{pdf.name}</p>
                 <div className={styles.meta}>
-                  <span style={{ color: "#22c55e", fontWeight: 600 }}>{pdf.status}</span>
+                  <span className={styles.statusBadge}>
+                    <span className={styles.statusDot} />
+                    {pdf.status}
+                  </span>
                   <span className={styles.dot}>·</span>
                   <span>{pdf.uploaded}</span>
                   <span className={styles.dot}>·</span>
@@ -94,27 +105,19 @@ export default function RecentPDFs({ notes = [], chats = [], onSelectPdf, showDe
               <div className={styles.right}>
                 <span className={styles.chatBadge} title="Associated chats">
                   <ChatBubbleIcon />
-                  {pdf.chats}
+                  {pdf.chats} chats
                 </span>
                 {onSelectPdf ? (
                   <button className={styles.askBtn} onClick={() => onSelectPdf(pdf.id)}>
-                    Ask AI
+                    ✨ Ask AI
                   </button>
                 ) : null}
                 {showDelete ? (
                   <button
+                    className={styles.deleteBtn}
                     onClick={(e) => handleDelete(e, pdf.id, pdf.name)}
-                    title="Delete PDF and vectors"
-                    style={{
-                      background: "rgba(239, 68, 68, 0.15)",
-                      border: "1px solid rgba(239, 68, 68, 0.3)",
-                      color: "#f87171",
-                      borderRadius: "6px",
-                      padding: "6px 8px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
+                    disabled={deletingId === pdf.id}
+                    title="Delete PDF and vector embeddings"
                   >
                     <TrashIcon />
                   </button>
@@ -127,3 +130,4 @@ export default function RecentPDFs({ notes = [], chats = [], onSelectPdf, showDe
     </div>
   );
 }
+

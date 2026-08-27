@@ -3,7 +3,7 @@ import styles from "./UploadCard.module.css";
 import { notifyDataChanged, uploadPDF } from "../../services/api";
 
 const UploadIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <polyline points="17 8 12 3 7 8" />
     <line x1="12" y1="3" x2="12" y2="15" />
@@ -16,21 +16,22 @@ export default function UploadCard() {
   const fileInputRef = useRef(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
-    window.setTimeout(() => setToast(null), 3000);
+    window.setTimeout(() => setToast(null), 3500);
   };
 
   const uploadFile = async (file) => {
     if (!file) return;
     if (file.type !== "application/pdf" && !file.name?.toLowerCase().endsWith(".pdf")) {
-      showToast("Only PDF files are supported.", "error");
+      showToast("Invalid file format. Only PDF files are supported.", "error");
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      showToast("File is larger than 50MB.", "error");
+      showToast("File is larger than the 50MB size limit.", "error");
       return;
     }
 
@@ -47,20 +48,32 @@ export default function UploadCard() {
         setUploadProgress(percent);
       });
 
-      showToast("PDF uploaded successfully.", "success");
+      showToast(`"${file.name}" uploaded & indexed successfully.`, "success");
       notifyDataChanged();
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       const message =
-        error?.response?.data?.message || "PDF upload failed. Please try again.";
+        error?.response?.data?.message || "PDF processing failed. Please try again.";
       showToast(message, "error");
     } finally {
       setUploading(false);
+      setIsDragOver(false);
     }
+  };
+
+  const onDragOver = (event) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const onDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragOver(false);
   };
 
   const onDrop = async (event) => {
     event.preventDefault();
+    setIsDragOver(false);
     const file = event.dataTransfer?.files?.[0];
     await uploadFile(file);
   };
@@ -69,13 +82,15 @@ export default function UploadCard() {
     <div className={styles.card}>
       {toast ? (
         <div className={`${styles.toast} ${toast.type === "error" ? styles.toastError : styles.toastSuccess}`}>
+          {toast.type === "error" ? "❌ " : "✅ "}
           {toast.message}
         </div>
       ) : null}
 
       <div
-        className={styles.dropZone}
-        onDragOver={(event) => event.preventDefault()}
+        className={`${styles.dropZone} ${isDragOver ? styles.dropZoneActive : ""}`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={() => fileInputRef.current?.click()}
       >
@@ -90,26 +105,31 @@ export default function UploadCard() {
         <div className={styles.iconRing}>
           <UploadIcon />
         </div>
-        <p className={styles.mainText}>Drop a PDF to start studying</p>
+        <p className={styles.mainText}>Drop PDF document to start AI indexing</p>
         <p className={styles.subText}>
-          Upload any textbook, notes, or document — your AI tutor will read it instantly.
+          Upload textbooks, lecture slides, or exam notes. Your AI companion will parse, chunk, and index them instantly.
         </p>
-        <div className={styles.btnRow}>
-          <button className={styles.browseBtn} type="button" disabled={uploading}>
-            {uploading ? `Uploading ${uploadProgress}%` : "Browse Files"}
-          </button>
-          <span className={styles.divider}>or</span>
-          <span className={styles.hint}>drag &amp; drop here</span>
-        </div>
 
         {uploading ? (
-          <div className={styles.progressTrack}>
-            <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
+          <div className={styles.uploadingBox}>
+            <div className={styles.progressText}>Uploading &amp; Processing ({uploadProgress}%)</div>
+            <div className={styles.progressTrack}>
+              <div className={styles.progressFill} style={{ width: `${uploadProgress}%` }} />
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <div className={styles.btnRow}>
+            <button className={styles.browseBtn} type="button" disabled={uploading}>
+              Browse PDF Files
+            </button>
+            <span className={styles.divider}>or</span>
+            <span className={styles.hint}>drag &amp; drop file here</span>
+          </div>
+        )}
 
-        <p className={styles.fileNote}>Supports PDF · Max 50MB</p>
+        <p className={styles.fileNote}>Supports PDF files up to 50MB</p>
       </div>
     </div>
   );
 }
+
