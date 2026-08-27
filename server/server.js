@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/db");
-const Note = require("./models/Note");
 
 const chatRoutes = require("./routes/chatRoutes");
 const chatHistoryRoutes = require("./routes/chatHistoryRoutes");
@@ -43,28 +42,6 @@ app.use("/api/retrieval", retrievalRoutes);
 // Health check
 app.get("/", (req, res) => {
   res.send("AI Study Companion Backend Running");
-});
-
-// Debug route
-app.get("/api/debug/latest-note", async (req, res) => {
-  try {
-    const note = await Note.findOne().sort({ createdAt: -1 });
-
-    if (!note) {
-      return res.json({ message: "No note found" });
-    }
-
-    res.json({
-      fileName: note.fileName,
-      chunkCount: note.chunkCount,
-      pdfTextLength: note.pdfTextLength,
-    });
-  } catch (error) {
-    console.error("Debug latest note error:", error);
-    res.status(500).json({
-      message: "Failed to fetch latest note",
-    });
-  }
 });
 
 // Server

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { AuthProvider } from "./hooks/useAuth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -8,16 +9,6 @@ import Chat from "./pages/Chat";
 import Upload from "./pages/Upload";
 import Quiz from "./pages/Quiz";
 
-function ProtectedRoute({ children }) {
-  const { token, loading } = useAuth();
-  const hasLocalToken = !!localStorage.getItem("token");
-
-  if (loading) {
-    return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", color: "white", background: "#0f172a" }}>Loading user session...</div>;
-  }
-
-  return (token || hasLocalToken) ? children : <Navigate to="/" replace />;
-}
 
 export default function App() {
   return (

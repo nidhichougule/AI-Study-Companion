@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import styles from "./Quiz.module.css";
 import Sidebar from "../components/Sidebar/Sidebar";
 import TopBar from "../components/TopBar/TopBar";
 import { generateQuiz, getNotes, submitQuizAttempt } from "../services/api";
+
+const SparklesIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+  </svg>
+);
+
+const BookIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+  </svg>
+);
 
 export default function Quiz() {
   const navigate = useNavigate();
@@ -10,10 +24,11 @@ export default function Quiz() {
   const [selectedNoteIds, setSelectedNoteIds] = useState([]);
   const [numQuestions, setNumQuestions] = useState(5);
   const [difficulty, setDifficulty] = useState("mixed");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const [quiz, setQuiz] = useState(null);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [userAnswers, setUserAnswers] = useState({}); // { 0: "A", 1: "C" }
+  const [userAnswers, setUserAnswers] = useState({});
   const [attemptResult, setAttemptResult] = useState(null);
 
   const [loading, setLoading] = useState(false);
@@ -49,7 +64,7 @@ export default function Quiz() {
       setQuiz(res.data?.quiz || null);
     } catch (err) {
       console.error("Quiz generation failed:", err);
-      const msg = err.response?.data?.message || "Quiz generation failed. Please try again.";
+      const msg = err.response?.data?.message || "Quiz generation failed. Please check backend LLM availability.";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -81,47 +96,41 @@ export default function Quiz() {
   const totalQuestions = quiz?.questions?.length || 0;
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#0f172a", color: "white", fontFamily: "sans-serif" }}>
-      <Sidebar onLogout={() => { localStorage.removeItem("token"); navigate("/"); }} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
-        <TopBar />
-        <main style={{ padding: "24px", maxWidth: "900px", margin: "0 auto", width: "100%" }}>
-          <div style={{ marginBottom: "20px" }}>
-            <h1 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 6px", color: "#f8fafc" }}>
-              🧠 AI MCQ Practice Quiz
-            </h1>
-            <p style={{ fontSize: "13px", color: "#94a3b8", margin: 0 }}>
-              Generate grounded multiple choice questions from your uploaded study materials.
+    <div className={styles.container}>
+      <Sidebar
+        onLogout={() => { localStorage.removeItem("token"); navigate("/"); }}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
+      />
+      <div className={styles.mainContent}>
+        <TopBar onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)} />
+        <main className={styles.inner}>
+          <div className={styles.pageHeader}>
+            <h1 className={styles.title}>🧠 AI MCQ Practice Quiz</h1>
+            <p className={styles.subtitle}>
+              Generate grounded multiple choice question tests from your uploaded PDF study materials.
             </p>
           </div>
 
           {/* SETUP MODE */}
           {!quiz && !attemptResult ? (
-            <div style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "24px" }}>
-              <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#e2e8f0" }}>1. Select Study Material</h3>
+            <div className={styles.card}>
+              <h3 className={styles.cardSectionTitle}>1. Select Study Material</h3>
               {notes.length === 0 ? (
-                <div style={{ padding: "16px", background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "8px", color: "#f87171", fontSize: "13px", marginBottom: "16px" }}>
-                  No study material uploaded yet. Please upload a PDF first to generate quizzes.
+                <div className={styles.emptyPillsWarning}>
+                  ⚠️ No study material uploaded yet. Please upload a PDF in Documents first to generate practice quizzes.
                 </div>
               ) : (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
+                <div className={styles.notePills}>
                   {notes.map((note) => {
                     const isSelected = selectedNoteIds.includes(note._id);
                     return (
                       <button
                         key={note._id}
                         onClick={() => handleToggleNote(note._id)}
-                        style={{
-                          padding: "8px 14px",
-                          borderRadius: "8px",
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          cursor: "pointer",
-                          background: isSelected ? "#3b82f6" : "rgba(255,255,255,0.05)",
-                          color: isSelected ? "#ffffff" : "#cbd5e1",
-                          border: isSelected ? "1px solid #60a5fa" : "1px solid rgba(255,255,255,0.1)",
-                        }}
+                        className={`${styles.notePill} ${isSelected ? styles.notePillSelected : ""}`}
                       >
+                        <BookIcon />
                         {isSelected ? "✓ " : ""}{note.fileName}
                       </button>
                     );
@@ -129,16 +138,14 @@ export default function Quiz() {
                 </div>
               )}
 
-              <h3 style={{ margin: "0 0 16px", fontSize: "16px", color: "#e2e8f0" }}>2. Configure Quiz Settings</h3>
-              <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "24px" }}>
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#94a3b8", marginBottom: "6px" }}>
-                    Number of Questions
-                  </label>
+              <h3 className={styles.cardSectionTitle}>2. Configure Quiz Parameters</h3>
+              <div className={styles.configRow}>
+                <div className={styles.field}>
+                  <label className={styles.label}>Number of Questions</label>
                   <select
                     value={numQuestions}
                     onChange={(e) => setNumQuestions(Number(e.target.value))}
-                    style={{ background: "#0f172a", color: "white", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "8px 12px", fontSize: "13px" }}
+                    className={styles.select}
                   >
                     <option value={5}>5 Questions</option>
                     <option value={10}>10 Questions</option>
@@ -146,16 +153,14 @@ export default function Quiz() {
                   </select>
                 </div>
 
-                <div>
-                  <label style={{ display: "block", fontSize: "12px", color: "#94a3b8", marginBottom: "6px" }}>
-                    Difficulty Level
-                  </label>
+                <div className={styles.field}>
+                  <label className={styles.label}>Difficulty Level</label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                    style={{ background: "#0f172a", color: "white", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "8px", padding: "8px 12px", fontSize: "13px" }}
+                    className={styles.select}
                   >
-                    <option value="mixed">Mixed</option>
+                    <option value="mixed">Mixed Difficulty</option>
                     <option value="easy">Easy</option>
                     <option value="medium">Medium</option>
                     <option value="hard">Hard</option>
@@ -164,105 +169,80 @@ export default function Quiz() {
               </div>
 
               {errorMsg ? (
-                <div style={{ color: "#f87171", fontSize: "13px", marginBottom: "16px" }}>{errorMsg}</div>
+                <div className={styles.errorCallout}>{errorMsg}</div>
               ) : null}
 
               <button
                 onClick={handleGenerateQuiz}
                 disabled={loading || notes.length === 0}
-                style={{
-                  padding: "12px 24px",
-                  background: loading ? "#64748b" : "#22c55e",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  cursor: loading || notes.length === 0 ? "not-allowed" : "pointer",
-                }}
+                className={styles.generateBtn}
               >
-                {loading ? "Generating AI MCQ Quiz..." : "✨ Generate AI Quiz"}
+                <SparklesIcon />
+                {loading ? "Generating AI MCQ Quiz..." : "Generate AI Practice Quiz"}
               </button>
             </div>
           ) : null}
 
           {/* ACTIVE QUIZ MODE */}
           {quiz && !attemptResult && currentQuestion ? (
-            <div style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <span style={{ fontSize: "13px", color: "#94a3b8" }}>
+            <div className={styles.card}>
+              <div className={styles.quizTopBar}>
+                <span className={styles.qCounter}>
                   Question {currentIdx + 1} of {totalQuestions}
                 </span>
-                <span style={{ fontSize: "12px", background: "rgba(59, 130, 246, 0.15)", color: "#60a5fa", padding: "3px 8px", borderRadius: "4px" }}>
+                <span className={styles.diffBadge}>
                   Difficulty: {currentQuestion.difficulty || "medium"}
                 </span>
               </div>
 
-              {/* Progress bar */}
-              <div style={{ background: "#0f172a", height: "6px", borderRadius: "3px", overflow: "hidden", marginBottom: "20px" }}>
-                <div style={{ background: "#3b82f6", height: "100%", width: `${((currentIdx + 1) / totalQuestions) * 100}%` }} />
+              {/* Progress track */}
+              <div className={styles.progressTrack}>
+                <div className={styles.progressFill} style={{ width: `${((currentIdx + 1) / totalQuestions) * 100}%` }} />
               </div>
 
-              <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#f8fafc", marginBottom: "20px", lineHeight: "1.5" }}>
+              <h2 className={styles.questionText}>
                 {currentQuestion.question}
               </h2>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
+              <div className={styles.optionsGrid}>
                 {["A", "B", "C", "D"].map((key) => {
                   const isSelected = userAnswers[currentIdx] === key;
                   return (
                     <button
                       key={key}
                       onClick={() => handleSelectOption(key)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        textAlign: "left",
-                        padding: "12px 16px",
-                        borderRadius: "8px",
-                        background: isSelected ? "rgba(59, 130, 246, 0.2)" : "rgba(255, 255, 255, 0.03)",
-                        border: isSelected ? "1px solid #3b82f6" : "1px solid rgba(255, 255, 255, 0.08)",
-                        color: isSelected ? "#93c5fd" : "#cbd5e1",
-                        fontSize: "14px",
-                        cursor: "pointer",
-                      }}
+                      className={`${styles.optionBtn} ${isSelected ? styles.optionSelected : ""}`}
                     >
-                      <strong style={{ marginRight: "12px", color: isSelected ? "#60a5fa" : "#64748b" }}>{key}.</strong>
-                      {currentQuestion.options[key]}
+                      <span className={`${styles.optKey} ${isSelected ? styles.optKeySelected : ""}`}>
+                        {key}
+                      </span>
+                      <span>{currentQuestion.options[key]}</span>
                     </button>
                   );
                 })}
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div className={styles.quizNav}>
                 <button
                   disabled={currentIdx === 0}
                   onClick={() => setCurrentIdx((prev) => prev - 1)}
-                  style={{
-                    padding: "8px 16px",
-                    background: "rgba(255,255,255,0.05)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    color: "white",
-                    borderRadius: "6px",
-                    cursor: currentIdx === 0 ? "not-allowed" : "pointer",
-                    opacity: currentIdx === 0 ? 0.5 : 1,
-                  }}
+                  className={styles.secondaryBtn}
                 >
-                  Previous
+                  &larr; Previous
                 </button>
 
                 {currentIdx < totalQuestions - 1 ? (
                   <button
                     onClick={() => setCurrentIdx((prev) => prev + 1)}
-                    style={{ padding: "8px 16px", background: "#3b82f6", border: "none", color: "white", borderRadius: "6px", cursor: "pointer" }}
+                    className={styles.nextBtn}
                   >
-                    Next Question
+                    Next Question &rarr;
                   </button>
                 ) : (
                   <button
                     onClick={handleSubmitQuiz}
                     disabled={submitting}
-                    style={{ padding: "8px 20px", background: "#22c55e", border: "none", color: "white", borderRadius: "6px", fontWeight: "600", cursor: "pointer" }}
+                    className={styles.submitBtn}
                   >
                     {submitting ? "Submitting..." : "Submit Quiz"}
                   </button>
@@ -273,39 +253,45 @@ export default function Quiz() {
 
           {/* RESULTS VIEW */}
           {attemptResult && quiz ? (
-            <div style={{ background: "#1e293b", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "24px" }}>
-              <div style={{ textAlign: "center", marginBottom: "24px", paddingBottom: "20px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-                <h2 style={{ margin: "0 0 8px", fontSize: "20px", color: "#f8fafc" }}>Quiz Results</h2>
-                <div style={{ fontSize: "36px", fontWeight: "800", color: attemptResult.percentage >= 70 ? "#4ade80" : "#f87171" }}>
-                  {attemptResult.score} / {attemptResult.totalQuestions} ({attemptResult.percentage}%)
+            <div className={styles.card}>
+              <div className={styles.resultsHeader}>
+                <div className={`${styles.scoreRing} ${attemptResult.percentage >= 70 ? styles.scoreHighRing : styles.scoreLowRing}`}>
+                  <span className={styles.scorePercent}>{attemptResult.percentage}%</span>
+                  <span className={styles.scoreFraction}>{attemptResult.score}/{attemptResult.totalQuestions}</span>
                 </div>
-                <p style={{ color: "#94a3b8", fontSize: "13px", margin: "4px 0 0" }}>
-                  {attemptResult.percentage >= 70 ? "🎉 Excellent mastery of your study material!" : "Keep reviewing your notes to improve."}
+                <h2 className={styles.resultsTitle}>Quiz Attempt Summary</h2>
+                <p className={styles.resultsFeedback}>
+                  {attemptResult.percentage >= 70
+                    ? "🎉 Excellent mastery of your study material! Keep up the great work."
+                    : "Keep reviewing your study notes and retry to improve your score."}
                 </p>
               </div>
 
-              <h3 style={{ fontSize: "15px", margin: "0 0 16px", color: "#e2e8f0" }}>Detailed Answers & Explanations</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "24px" }}>
+              <h3 className={styles.cardSectionTitle}>Detailed Answers & Explanations</h3>
+              <div className={styles.answersList}>
                 {quiz.questions.map((q, idx) => {
                   const userAns = attemptResult.answers.find((a) => a.questionIndex === idx);
                   const isCorrect = userAns?.isCorrect;
                   const selectedOpt = userAns?.selectedOption || "None";
 
                   return (
-                    <div key={idx} style={{ padding: "16px", background: "rgba(0,0,0,0.2)", borderRadius: "8px", borderLeft: isCorrect ? "4px solid #22c55e" : "4px solid #ef4444" }}>
-                      <div style={{ fontSize: "14px", fontWeight: "600", color: "#f8fafc", marginBottom: "8px" }}>
+                    <div
+                      key={idx}
+                      className={`${styles.ansCard} ${isCorrect ? styles.ansCardCorrect : styles.ansCardIncorrect}`}
+                    >
+                      <div className={styles.ansQuestion}>
                         Q{idx + 1}: {q.question}
                       </div>
-                      <div style={{ fontSize: "13px", color: isCorrect ? "#4ade80" : "#f87171", marginBottom: "4px" }}>
-                        Your Answer: {selectedOpt} - {q.options[selectedOpt] || "No response"} {isCorrect ? "✓" : "✗"}
+                      <div className={`${styles.userAnsLine} ${isCorrect ? styles.correctText : styles.incorrectText}`}>
+                        Your Answer: Option {selectedOpt} - {q.options[selectedOpt] || "No response"} {isCorrect ? "✓ Correct" : "✗ Incorrect"}
                       </div>
                       {!isCorrect ? (
-                        <div style={{ fontSize: "13px", color: "#4ade80", marginBottom: "6px" }}>
-                          Correct Answer: {q.correctAnswer} - {q.options[q.correctAnswer]}
+                        <div className={`${styles.userAnsLine} ${styles.correctText}`}>
+                          Correct Answer: Option {q.correctAnswer} - {q.options[q.correctAnswer]}
                         </div>
                       ) : null}
                       {q.explanation ? (
-                        <div style={{ fontSize: "12px", color: "#94a3b8", fontStyle: "italic", background: "rgba(255,255,255,0.03)", padding: "8px", borderRadius: "4px", marginTop: "6px" }}>
+                        <div className={styles.explanationBox}>
                           💡 <strong>Explanation:</strong> {q.explanation}
                         </div>
                       ) : null}
@@ -316,7 +302,7 @@ export default function Quiz() {
 
               <button
                 onClick={() => { setQuiz(null); setAttemptResult(null); }}
-                style={{ padding: "10px 20px", background: "#3b82f6", border: "none", color: "white", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}
+                className={styles.secondaryBtn}
               >
                 🔄 Take Another Quiz
               </button>

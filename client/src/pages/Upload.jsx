@@ -11,6 +11,7 @@ export default function Upload() {
   const [notes, setNotes] = useState([]);
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -40,25 +41,31 @@ export default function Upload() {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: "#0f172a", color: "white", fontFamily: "sans-serif" }}>
-      <Sidebar onLogout={handleLogout} />
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto" }}>
-        <TopBar />
-        <main style={{ padding: "24px", maxWidth: "1000px", margin: "0 auto", width: "100%" }}>
-          <div style={{ marginBottom: "20px" }}>
-            <h1 style={{ fontSize: "22px", fontWeight: "700", margin: "0 0 6px", color: "#f8fafc" }}>📄 Document Management Hub</h1>
-            <p style={{ fontSize: "13px", color: "#94a3b8", margin: 0 }}>
-              Upload and manage your PDF study notes. All uploaded documents are indexed for instant semantic AI retrieval.
+    <div style={{ display: "flex", height: "100vh", background: "var(--bg-dark)", color: "var(--text-main)", fontFamily: "var(--font-sans)", overflow: "hidden" }}>
+      <Sidebar
+        onLogout={handleLogout}
+        mobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
+      />
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflowY: "auto", minWidth: 0 }}>
+        <TopBar onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)} />
+        <main style={{ padding: "28px", maxWidth: "1040px", margin: "0 auto", width: "100%" }}>
+          <div style={{ marginBottom: "24px" }}>
+            <h1 style={{ fontSize: "24px", fontWeight: "800", margin: "0 0 6px", color: "var(--text-main)", letterSpacing: "-0.4px" }}>
+              📄 Document Management Hub
+            </h1>
+            <p style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
+              Upload and manage your PDF study notes. All uploaded documents are indexed for instant semantic AI retrieval and practice quiz generation.
             </p>
           </div>
 
-          <section style={{ marginBottom: "24px" }}>
+          <section style={{ marginBottom: "28px" }}>
             <UploadCard />
           </section>
 
           <section>
             {loading ? (
-              <div style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>Loading documents...</div>
+              <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)", fontSize: "14px" }}>Loading documents...</div>
             ) : (
               <RecentPDFs
                 notes={notes}

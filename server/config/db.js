@@ -76,8 +76,27 @@ const connectDB = async () => {
       } catch (fallbackErr) {
         console.error(`❌ Local fallback MongoDB connection failed: ${fallbackErr.message}`);
       }
+    }
+
+    // In-Memory MongoDB fallback only when explicitly enabled or running test suite
+    const allowInMemory = process.env.ALLOW_IN_MEMORY_FALLBACK === "true" || process.env.NODE_ENV === "test";
+
+    if (allowInMemory) {
+      try {
+        console.log("⚡ Starting Explicit In-Memory MongoDB Fallback Instance...");
+        const { MongoMemoryServer } = require("mongodb-memory-server");
+        const mongoServer = await MongoMemoryServer.create({
+          binary: { version: "6.0.6" }
+        });
+        const memUri = mongoServer.getUri();
+        await mongoose.connect(memUri);
+        console.log("✅ Connected to In-Memory MongoDB Fallback Instance.");
+        return true;
+      } catch (memErr) {
+        console.error(`❌ In-Memory MongoDB fallback failed: ${memErr.message}`);
+      }
     } else {
-      console.log("💡 Local fallback is disabled. Set ALLOW_LOCAL_MONGO_FALLBACK=true or LOCAL_MONGO_URI in server/.env if you wish to allow local offline MongoDB fallback.");
+      console.log("💡 In-Memory Fallback is disabled for normal development. Set ALLOW_IN_MEMORY_FALLBACK=true in server/.env or whitelist your IP address in MongoDB Atlas.");
     }
 
     return false;
